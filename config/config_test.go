@@ -11,6 +11,7 @@ import (
 
 var expected = &Config{
 	Runtime:  "Native",
+	Bind:     "0.0.0.0",
 	Port:     8080,
 	CloneDir: "/tmp/",
 	Projects: []maestroConfig.Project{

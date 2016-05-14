@@ -11,6 +11,7 @@ import (
 // Config is the struct of the config file
 type Config struct {
 	Runtime  string
+	Bind     string
 	Port     uint32
 	CloneDir string
 	Projects []maestroConfig.Project
