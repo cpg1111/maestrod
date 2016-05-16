@@ -10,10 +10,12 @@ import (
 )
 
 var expected = &Config{
-	Runtime:  "Native",
-	Bind:     "0.0.0.0",
-	Port:     8080,
-	CloneDir: "/tmp/",
+	Server: server{
+		Runtime:  "Native",
+		Host:     "0.0.0.0",
+		Port:     8080,
+		CloneDir: "/tmp/",
+	},
 	Projects: []maestroConfig.Project{
 		maestroConfig.Project{
 			RepoURL:        "git@github.com:cpg1111/maestro.git",
