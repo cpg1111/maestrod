@@ -45,10 +45,11 @@ func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Run starts a server
-func Run(host string, port uint32) (*http.ServeMux, error) {
+func Run(host string, port uint) (*http.ServeMux, error) {
 	server := http.NewServeMux()
 	addr := fmt.Sprintf("%s:%d", host, port)
 	indexHandler := NewIndexHandler()
+	server.Handle("/", indexHandler)
 	http.ListenAndServe(addr, server)
 	return server, nil
 }

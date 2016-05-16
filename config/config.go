@@ -8,12 +8,16 @@ import (
 	maestroConfig "github.com/cpg1111/maestro/config"
 )
 
+type server struct {
+	Runtime  string
+	Host     string
+	Port     uint
+	CloneDir string
+}
+
 // Config is the struct of the config file
 type Config struct {
-	Runtime  string
-	Bind     string
-	Port     uint32
-	CloneDir string
+	Server   server
 	Projects []maestroConfig.Project
 }
 
