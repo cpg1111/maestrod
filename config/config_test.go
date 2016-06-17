@@ -9,10 +9,16 @@ import (
 
 var expected = &Config{
 	Server: Server{
-		Runtime:      "docker",
-		Host:         "0.0.0.0",
-		Port:         8080,
-		WorkspaceDir: "/tmp/",
+		Runtime:          "docker",
+		RuntimeTLSClient: true,
+		RuntimeTLSServer: true,
+		ClientCertPath:   "./clientcrt.pem",
+		ClientKeyPath:    "./clientkey.pem",
+		ServerCertPath:   "./fullchain.pem",
+		ServerKeyPath:    "./privkey.pem",
+		Host:             "0.0.0.0",
+		Port:             8080,
+		WorkspaceDir:     "/tmp/",
 	},
 	Projects: []Project{
 		Project{

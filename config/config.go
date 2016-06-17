@@ -7,11 +7,17 @@ import (
 )
 
 type Server struct {
-	Runtime        string
-	MaestroVersion string
-	Host           string
-	Port           uint
-	WorkspaceDir   string
+	Runtime          string
+	RuntimeTLSClient bool
+	RuntimeTLSServer bool
+	ClientCertPath   string
+	ClientKeyPath    string
+	ServerCertPath   string
+	ServerKeyPath    string
+	MaestroVersion   string
+	Host             string
+	Port             uint
+	WorkspaceDir     string
 }
 
 type Project struct {

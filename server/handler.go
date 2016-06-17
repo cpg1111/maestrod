@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/cpg1111/maestrod/config"
 )
 
 // SubHandler is an interface to handle http within a RouteHandler
@@ -45,11 +47,15 @@ func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Run starts a server
-func Run(host string, port uint) (*http.ServeMux, error) {
+func Run(conf *config.Server) (*http.ServeMux, error) {
 	server := http.NewServeMux()
-	addr := fmt.Sprintf("%s:%d", host, port)
+	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	indexHandler := NewIndexHandler()
 	server.Handle("/", indexHandler)
-	http.ListenAndServe(addr, server)
+	if conf.RuntimeTLSServer {
+		http.ListenAndServeTLS(addr, conf.ServerCertPath, conf.ServerKeyPath, server)
+	} else {
+		http.ListenAndServe(addr, server)
+	}
 	return server, nil
 }

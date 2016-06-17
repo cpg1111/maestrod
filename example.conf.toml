@@ -1,7 +1,8 @@
 [Server]
 Runtime="docker"
+RuntimeTLS=true
 Host="0.0.0.0"
-Port=8080
+Port=8484
 WorkspaceDir="/tmp/"
 
 [[Project]]
