@@ -1,2 +1,10 @@
 [Server]
-Runtime="native"
+Runtime="docker"
+Host="0.0.0.0"
+Port=8080
+WorkspaceDir="/tmp/"
+
+[[Project]]
+Name="maestrod"
+MaestroConfPath="../maestro/test_conf.toml"
+DeployBranches=["master"]
