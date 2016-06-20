@@ -12,6 +12,8 @@ var expected = &Config{
 		Runtime:          "docker",
 		RuntimeTLSClient: true,
 		RuntimeTLSServer: true,
+		TargetHost:       "",
+		MaestroVersion:   "0.1.1",
 		ClientCertPath:   "./clientcrt.pem",
 		ClientKeyPath:    "./clientkey.pem",
 		ServerCertPath:   "./fullchain.pem",

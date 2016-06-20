@@ -10,6 +10,7 @@ type Server struct {
 	Runtime          string
 	RuntimeTLSClient bool
 	RuntimeTLSServer bool
+	TargetHost       string
 	ClientCertPath   string
 	ClientKeyPath    string
 	ServerCertPath   string

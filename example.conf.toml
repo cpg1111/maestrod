@@ -1,6 +1,13 @@
 [Server]
 Runtime="docker"
-RuntimeTLS=true
+RuntimeTLSClient=true
+RuntimeTLSServer=true
+TargetHost=""
+MaestroVersion="0.1.1"
+ClientCertPath="./clientcrt.pem"
+ClientKeyPath=""
+ServerCertPath="./fullchain.pem"
+ServerKeyPath="./privkey.pem"
 Host="0.0.0.0"
 Port=8484
 WorkspaceDir="/tmp/"
