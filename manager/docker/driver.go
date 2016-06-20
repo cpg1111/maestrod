@@ -126,6 +126,7 @@ func (d *Driver) create(ctx context.Context) error {
 }
 
 func (d Driver) Run(args []string) error {
+	d.cmd = args
 	ctx := context.Background()
 	needToPull, checkErr := d.needToPull(ctx)
 	if checkErr != nil {
