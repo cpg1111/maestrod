@@ -25,3 +25,9 @@ _testmain.go
 
 # Godeps
 Godeps/_workspace
+
+# Dev TLS keys
+clientcrt.pem
+clientkey.pem
+fullchain.pem
+privkey.pem

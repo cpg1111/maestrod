@@ -4,21 +4,33 @@ import (
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
-
-	maestroConfig "github.com/cpg1111/maestro/config"
 )
 
-type server struct {
-	Runtime  string
-	Host     string
-	Port     uint
-	CloneDir string
+type Server struct {
+	Runtime          string
+	RuntimeTLSClient bool
+	RuntimeTLSServer bool
+	TargetHost       string
+	ClientCertPath   string
+	ClientKeyPath    string
+	ServerCertPath   string
+	ServerKeyPath    string
+	MaestroVersion   string
+	Host             string
+	Port             uint
+	WorkspaceDir     string
+}
+
+type Project struct {
+	Name            string
+	MaestroConfPath string
+	DeployBranches  []string
 }
 
 // Config is the struct of the config file
 type Config struct {
-	Server   server
-	Projects []maestroConfig.Project
+	Server   Server
+	Projects []Project
 }
 
 // Load loads a config file and returns a pointer to a config struct

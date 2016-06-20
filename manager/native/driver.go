@@ -1,4 +1,4 @@
-package manager
+package native
 
 import (
 	"fmt"
@@ -13,12 +13,13 @@ type Native struct {
 }
 
 // Run runs the native driver
-func (n Native) Run() error {
+func (n Native) Run(args []string) error {
 	maestro, lookErr := exec.LookPath("maestro")
 	if lookErr != nil {
 		return lookErr
 	}
-	cmd := exec.Command("./container", maestro)
+	cmd := exec.Command("./maestrod-container", maestro)
+	cmd.Args = append(cmd.Args, args)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 	}

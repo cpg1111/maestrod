@@ -5,27 +5,28 @@ import (
 	"testing"
 
 	"github.com/fatih/structs"
-
-	maestroConfig "github.com/cpg1111/maestro/config"
 )
 
 var expected = &Config{
-	Server: server{
-		Runtime:  "Native",
-		Host:     "0.0.0.0",
-		Port:     8080,
-		CloneDir: "/tmp/",
+	Server: Server{
+		Runtime:          "docker",
+		RuntimeTLSClient: true,
+		RuntimeTLSServer: true,
+		TargetHost:       "",
+		MaestroVersion:   "0.1.1",
+		ClientCertPath:   "./clientcrt.pem",
+		ClientKeyPath:    "./clientkey.pem",
+		ServerCertPath:   "./fullchain.pem",
+		ServerKeyPath:    "./privkey.pem",
+		Host:             "0.0.0.0",
+		Port:             8080,
+		WorkspaceDir:     "/tmp/",
 	},
-	Projects: []maestroConfig.Project{
-		maestroConfig.Project{
-			RepoURL:        "git@github.com:cpg1111/maestro.git",
-			CloneCMD:       "git clone",
-			AuthType:       "SSH",
-			SSHPrivKeyPath: "~/.ssh/id_rsa",
-			SSHPubKeyPath:  "~/.ssh/id_rsa.pub",
-			Username:       "git",
-			Password:       "",
-			PromptForPWD:   false,
+	Projects: []Project{
+		Project{
+			Name:            "maestrod",
+			MaestroConfPath: "../maestro/test_conf.toml",
+			DeployBranches:  []string{"master"},
 		},
 	},
 }
@@ -39,8 +40,8 @@ func TestLoad(t *testing.T) {
 	testMap := structs.Map(*conf)
 	for i := range expectedMap {
 		if i == "Projects" {
-			expectedArr := expectedMap[i].([]maestroConfig.Project)
-			testArr := testMap[i].([]maestroConfig.Project)
+			expectedArr := expectedMap[i].([]Project)
+			testArr := testMap[i].([]Project)
 			if len(expectedArr) != len(testArr) {
 				t.Error("Did not load expected amount of projects")
 			}
