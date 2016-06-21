@@ -3,7 +3,6 @@ package docker
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/cpg1111/maestrod/manager"
 
@@ -20,18 +19,21 @@ type Driver struct {
 	containerID string
 	image       string
 	cmd         []string
+	confTarget  string
+	hostVolume  string
 }
 
-func New(host, apiVersion, maestroVersion, name string) (*Driver, error) {
-	hClient := &http.Client{}
-	dClient, dockerErr := dockerEngine.NewClient(host, apiVersion, hClient, make(map[string]string))
+func New(host, apiVersion, maestroVersion, name, confTarget, hostVolume string) (*Driver, error) {
+	dClient, dockerErr := dockerEngine.NewEnvClient()
 	if dockerErr != nil {
 		return nil, dockerErr
 	}
 	return &Driver{
 		client:      dClient,
-		containerID: name,
+		containerID: fmt.Sprintf("maestro_%s", name),
 		image:       fmt.Sprintf("cpg1111/maestro:%s", maestroVersion),
+		confTarget:  confTarget,
+		hostVolume:  hostVolume,
 	}, nil
 }
 
@@ -63,25 +65,28 @@ func (d *Driver) pull(ctx context.Context) error {
 	return nil
 }
 
+type empty struct{}
+
 func (d *Driver) getContainerConfig() *dockerContainer.Config {
 	labels := make(map[string]string)
 	labels["NAME"] = d.containerID
 	timeout := 5
+	volumes := make(map[string]struct{})
+	volumes[d.confTarget] = empty{}
 	return &dockerContainer.Config{
-		User:         "maestro",
 		AttachStdin:  false,
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          false,
 		OpenStdin:    false,
 		StdinOnce:    false,
-		Cmd:          d.cmd,
+		Cmd:          d.cmd[1:],
 		Healthcheck: &dockerContainer.HealthConfig{
 			Test: []string{""},
 		},
 		ArgsEscaped:     true,
 		Image:           d.image,
-		Volumes:         make(map[string]struct{}),
+		Volumes:         volumes,
 		WorkingDir:      "/",
 		NetworkDisabled: false,
 		Labels:          labels,
@@ -93,7 +98,7 @@ func (d *Driver) getContainerConfig() *dockerContainer.Config {
 func (d *Driver) getHostConfig() *dockerContainer.HostConfig {
 	logConf := make(map[string]string)
 	return &dockerContainer.HostConfig{
-		Binds:           []string{},
+		Binds:           []string{fmt.Sprintf("%s:%s:ro", d.confTarget, d.hostVolume)},
 		ContainerIDFile: "/tmp/containers",
 		LogConfig: dockerContainer.LogConfig{
 			Type:   "json-file",
@@ -116,6 +121,31 @@ func (d *Driver) getNetworkConfig() *dockerNetwork.NetworkingConfig {
 	return &dockerNetwork.NetworkingConfig{}
 }
 
+func (d *Driver) needToRemove(ctx context.Context) (bool, string, error) {
+	options := dockerTypes.ContainerListOptions{
+		All: true,
+	}
+	list, listErr := d.client.ContainerList(ctx, options)
+	if listErr != nil {
+		return false, "", listErr
+	}
+	for i := range list {
+		if list[i].Labels["NAME"] == d.containerID {
+			return true, list[i].ID, nil
+		}
+	}
+	return false, "", nil
+}
+
+func (d *Driver) remove(ctx context.Context, id string) error {
+	options := dockerTypes.ContainerRemoveOptions{
+		RemoveVolumes: true,
+		RemoveLinks:   false,
+		Force:         true,
+	}
+	return d.client.ContainerRemove(ctx, id, options)
+}
+
 func (d *Driver) create(ctx context.Context) error {
 	createResp, err := d.client.ContainerCreate(ctx, d.getContainerConfig(), d.getHostConfig(), d.getNetworkConfig(), d.containerID)
 	if err != nil {
@@ -123,6 +153,10 @@ func (d *Driver) create(ctx context.Context) error {
 	}
 	log.Println(createResp)
 	return nil
+}
+
+func (d *Driver) start(ctx context.Context) error {
+	return d.client.ContainerStart(ctx, d.containerID, dockerTypes.ContainerStartOptions{})
 }
 
 func (d Driver) Run(args []string) error {
@@ -138,9 +172,19 @@ func (d Driver) Run(args []string) error {
 			return pullErr
 		}
 	}
+	needToRemoveOld, removalID, checkRemoveErr := d.needToRemove(ctx)
+	if checkRemoveErr != nil {
+		return checkRemoveErr
+	}
+	if needToRemoveOld {
+		removeErr := d.remove(ctx, removalID)
+		if removeErr != nil {
+			return removeErr
+		}
+	}
 	createErr := d.create(ctx)
 	if createErr != nil {
 		return createErr
 	}
-	return nil
+	return d.start(ctx)
 }
