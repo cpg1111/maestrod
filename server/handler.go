@@ -9,6 +9,9 @@ import (
 	"github.com/cpg1111/maestrod/datastore"
 )
 
+// store is a global datastore
+var store datastore.Datastore
+
 // SubHandler is an interface to handle http within a RouteHandler
 type SubHandler interface {
 	Get(res http.ResponseWriter, req *http.Request)
@@ -48,14 +51,17 @@ func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Run starts a server
-func Run(conf *config.Server, store *datastore.Datastore) (*http.ServeMux, error) {
+func Run(conf *config.Server, dstore *datastore.Datastore) (*http.ServeMux, error) {
+	store = *dstore
 	server := http.NewServeMux()
 	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	indexHandler := NewIndexHandler()
 	server.Handle("/", indexHandler)
 	if conf.RuntimeTLSServer {
+		log.Println("serving securely at ", addr)
 		http.ListenAndServeTLS(addr, conf.ServerCertPath, conf.ServerKeyPath, server)
 	} else {
+		log.Println("serving insecurely at ", addr)
 		http.ListenAndServe(addr, server)
 	}
 	return server, nil
