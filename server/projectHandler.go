@@ -26,6 +26,7 @@ func (p ProjectSubHandler) Get(res http.ResponseWriter, req *http.Request) {
 			doneChan <- true
 		}
 	})
+	_ = <-doneChan
 }
 
 func (p ProjectSubHandler) Post(res http.ResponseWriter, req *http.Request) {
