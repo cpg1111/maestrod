@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/cpg1111/maestrod/config"
+	"github.com/cpg1111/maestrod/datastore"
 )
 
 // SubHandler is an interface to handle http within a RouteHandler
@@ -47,7 +48,7 @@ func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Run starts a server
-func Run(conf *config.Server) (*http.ServeMux, error) {
+func Run(conf *config.Server, store *datastore.Datastore) (*http.ServeMux, error) {
 	server := http.NewServeMux()
 	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	indexHandler := NewIndexHandler()
