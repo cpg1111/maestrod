@@ -9,6 +9,7 @@ import (
 // IndexSubHandler is the SubHandler for the index route
 type IndexSubHandler struct {
 	SubHandler
+	Error ErrorHandler
 }
 
 // Get is the get method for /
@@ -23,22 +24,22 @@ func (i IndexSubHandler) Get(res http.ResponseWriter, req *http.Request) {
 
 // Post is the post method for /
 func (i IndexSubHandler) Post(res http.ResponseWriter, req *http.Request) {
-	return
+	i.Error.handle404(res, req)
 }
 
 // Put is the put method for /
 func (i IndexSubHandler) Put(res http.ResponseWriter, req *http.Request) {
-	return
+	i.Error.handle404(res, req)
 }
 
 // Patch is the Patch method for /
 func (i IndexSubHandler) Patch(res http.ResponseWriter, req *http.Request) {
-	return
+	i.Error.handle404(res, req)
 }
 
 // Delete is the Delete method for /
 func (i IndexSubHandler) Delete(res http.ResponseWriter, req *http.Request) {
-	return
+	i.Error.handle404(res, req)
 }
 
 // NewIndexHandler returns a pointer to a new IndexHandler instance

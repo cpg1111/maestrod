@@ -7,24 +7,31 @@ import (
 )
 
 type Server struct {
-	Runtime          string
-	RuntimeTLSClient bool
-	RuntimeTLSServer bool
-	TargetHost       string
-	ClientCertPath   string
-	ClientKeyPath    string
-	ServerCertPath   string
-	ServerKeyPath    string
-	MaestroVersion   string
-	Host             string
-	Port             uint
-	WorkspaceDir     string
+	Runtime             string
+	RuntimeTLSClient    bool
+	RuntimeTLSServer    bool
+	DataStoreType       string
+	DataStoreUser       string
+	DataStorePWD        string
+	DataStoreEnvIP      string
+	DataStoreStaticIP   string
+	DataStoreEnvPort    string
+	DataStoreStaticPort string
+	TargetHost          string
+	ClientCertPath      string
+	ClientKeyPath       string
+	ServerCertPath      string
+	ServerKeyPath       string
+	MaestroVersion      string
+	Host                string
+	Port                uint
+	WorkspaceDir        string
 }
 
 type Project struct {
-	Name            string
-	MaestroConfPath string
-	DeployBranches  []string
+	Name            string   `json:"name"`
+	MaestroConfPath string   `json:"confPath"`
+	DeployBranches  []string `json:"deployBranches"`
 }
 
 // Config is the struct of the config file
