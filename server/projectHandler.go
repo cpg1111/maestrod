@@ -16,16 +16,24 @@ func (p ProjectSubHandler) Get(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	queries := req.URL.Query()
 	doneChan := make(chan bool)
-	store.Find(queries["name"][0], func(dbRes interface{}, err error) {
-		if err != nil {
-			p.Error.handle500(res, req, err)
+	if len(queries["name"]) > 0 {
+		store.Find(queries["name"][0], func(dbRes interface{}, err error) {
+			if err != nil {
+				p.Error.handle500(res, req, err)
+				doneChan <- true
+			} else {
+				res.WriteHeader(http.StatusOK)
+				res.Write(dbRes.([]byte))
+				doneChan <- true
+			}
+		})
+	} else {
+		go func() {
+			res.WriteHeader(http.StatusBadRequest)
+			res.Write(([]byte)("Bad Request"))
 			doneChan <- true
-		} else {
-			res.WriteHeader(http.StatusOK)
-			res.Write(dbRes.([]byte))
-			doneChan <- true
-		}
-	})
+		}()
+	}
 	_ = <-doneChan
 }
 
@@ -73,6 +81,10 @@ func (p ProjectSubHandler) Put(res http.ResponseWriter, req *http.Request) {
 	_ = <-doneChan
 }
 
+func (p ProjectSubHandler) Patch(res http.ResponseWriter, req *http.Request) {
+	p.Error.handle404(res, req)
+}
+
 func (p ProjectSubHandler) Delete(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	queries := req.URL.Query()
@@ -88,4 +100,11 @@ func (p ProjectSubHandler) Delete(res http.ResponseWriter, req *http.Request) {
 		}
 	})
 	_ = <-doneChan
+}
+
+func NewProjectHandler() *RouteHandler {
+	return &RouteHandler{
+		Route: "/project",
+		sub:   ProjectSubHandler{},
+	}
 }
