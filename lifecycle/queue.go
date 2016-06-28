@@ -72,3 +72,13 @@ func (q *Queue) Pop(r *Running, maxBuilds int) *QueueEntry {
 	}
 	return nil
 }
+
+func (q *Queue) SnapShot() error {
+	errChan := make(chan error)
+	store := *q.store
+	store.Save("queue", q.Queue, func(err error) {
+		errChan <- err
+	})
+	saveErr := <-errChan
+	return saveErr
+}

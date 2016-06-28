@@ -11,14 +11,14 @@ DataStoreEnvPort="REDIS_SERVICE_PORT"
 TargetHost=""
 MaestroVersion="0.1.1"
 ClientCertPath="./clientcrt.pem"
-ClientKeyPath=""
+ClientKeyPath="./clientkey.pem"
 ServerCertPath="./fullchain.pem"
 ServerKeyPath="./privkey.pem"
 Host="0.0.0.0"
 Port=8484
 WorkspaceDir="/tmp/"
 
-[[Project]]
+[[Projects]]
 Name="maestrod"
 MaestroConfPath="../maestro/test_conf.toml"
 DeployBranches=["master"]

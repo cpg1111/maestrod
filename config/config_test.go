@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/fatih/structs"
@@ -25,7 +26,7 @@ var expected = &Config{
 		ServerCertPath:   "./fullchain.pem",
 		ServerKeyPath:    "./privkey.pem",
 		Host:             "0.0.0.0",
-		Port:             8080,
+		Port:             8484,
 		WorkspaceDir:     "/tmp/",
 	},
 	Projects: []Project{
@@ -38,7 +39,7 @@ var expected = &Config{
 }
 
 func TestLoad(t *testing.T) {
-	conf, loadErr := Load("../test_conf.toml")
+	conf, loadErr := Load(fmt.Sprintf("%ssrc/github.com/cpg1111/maestrod/example.conf.toml", os.Getenv("GOPATH")))
 	if loadErr != nil {
 		t.Error(loadErr)
 	}
@@ -51,8 +52,15 @@ func TestLoad(t *testing.T) {
 			if len(expectedArr) != len(testArr) {
 				t.Error("Did not load expected amount of projects")
 			}
-		}
-		if testMap[i] == nil || testMap[i] != expectedMap[i] {
+		} else if i == "Server" {
+			expectedSrvMap := expectedMap[i].(map[string]interface{})
+			testSrvMap := testMap[i].(map[string]interface{})
+			for j := range expectedSrvMap {
+				if testSrvMap[j] == nil || testSrvMap[j] != expectedSrvMap[j] {
+					t.Error(fmt.Errorf("Expected %v found %v for field %s", expectedSrvMap[j], testSrvMap[j], j))
+				}
+			}
+		} else if testMap[i] == nil || testMap[i] != expectedMap[i] {
 			t.Error(fmt.Errorf("Expected %v found %v for field %s", expectedMap[i], testMap[i], i))
 		}
 	}
