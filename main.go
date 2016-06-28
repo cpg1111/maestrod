@@ -85,8 +85,8 @@ func getManager(conf *config.Config) manager.Driver {
 func main() {
 	conf := getConf()
 	store := getDataStore(conf)
-	server.Run(&conf.Server, store)
 	queue := lifecycle.NewQueue(store)
+	server.Run(&conf.Server, store, queue)
 	running := &lifecycle.Running{}
 	managerDriver := getManager(conf)
 	errChan := make(chan error)

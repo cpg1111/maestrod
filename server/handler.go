@@ -7,6 +7,7 @@ import (
 
 	"github.com/cpg1111/maestrod/config"
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/lifecycle"
 )
 
 // store is a global datastore
@@ -51,14 +52,16 @@ func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Run starts a server
-func Run(conf *config.Server, dstore *datastore.Datastore) (*http.ServeMux, error) {
+func Run(conf *config.Server, dstore *datastore.Datastore, queue *lifecycle.Queue) (*http.ServeMux, error) {
 	store = *dstore
 	server := http.NewServeMux()
 	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	indexHandler := NewIndexHandler()
 	projectHandler := NewProjectHandler()
-	server.Handle("/", indexHandler)
-	server.Handle("/project", projectHandler)
+	pushHandler := NewPushHandler(queue)
+	server.Handle(indexHandler.Route, indexHandler)
+	server.Handle(projectHandler.Route, projectHandler)
+	server.Handle(pushHandler.Route, pushHandler)
 	if conf.RuntimeTLSServer {
 		log.Println("serving securely at ", addr)
 		go http.ListenAndServeTLS(addr, conf.ServerCertPath, conf.ServerKeyPath, server)
