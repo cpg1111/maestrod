@@ -9,6 +9,7 @@ import (
 	redis "gopkg.in/redis.v3"
 )
 
+// RedisStore is the datastore backed by redis
 type RedisStore struct {
 	Datastore
 	store *redis.Client
@@ -18,6 +19,7 @@ type redisData struct {
 	Data interface{}
 }
 
+// NewRedis returns a pointer to a new RedisStore instance
 func NewRedis(host, port, password string) *RedisStore {
 	options := &redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", host, port),
@@ -28,6 +30,7 @@ func NewRedis(host, port, password string) *RedisStore {
 	}
 }
 
+// Save saves data in redis and takes a NoResultCallback
 func (r RedisStore) Save(key string, data interface{}, callback NoResultCallback) {
 	go func() {
 		rData := &redisData{
@@ -49,6 +52,7 @@ func (r RedisStore) Save(key string, data interface{}, callback NoResultCallback
 	}()
 }
 
+// Find finds data in redis and takes a ResultCallback
 func (r RedisStore) Find(queryStr string, callback ResultCallback) {
 	go func() {
 		cmd := r.store.Get(queryStr)
@@ -56,6 +60,7 @@ func (r RedisStore) Find(queryStr string, callback ResultCallback) {
 	}()
 }
 
+// Remove removes data from redis and takes a NoResultCallback
 func (r RedisStore) Remove(queryStr string, callback NoResultCallback) {
 	go func() {
 		cmd := r.store.Set(queryStr, nil, 0)
@@ -69,6 +74,7 @@ func (r RedisStore) Remove(queryStr string, callback NoResultCallback) {
 	}()
 }
 
+// Update updates a key in redis with a new value
 func (r RedisStore) Update(queryStr string, update interface{}, callback NoResultCallback) {
 	resChan := make(chan string)
 	errChan := make(chan error)
@@ -115,6 +121,7 @@ func (r RedisStore) Update(queryStr string, update interface{}, callback NoResul
 	}()
 }
 
+// Find and update does the same as Update but passes the data to the callback as well
 func (r RedisStore) FindAndUpdate(queryStr string, update interface{}, callback ResultCallback) {
 	r.Update(queryStr, update, func(err error) {
 		if err != nil {

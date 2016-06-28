@@ -14,6 +14,7 @@ type Native struct {
 	manager.Driver
 }
 
+// New returns a pointer to a Native Driver instance
 func New() *Native {
 	return &Native{}
 }

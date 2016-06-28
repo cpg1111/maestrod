@@ -13,6 +13,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Driver is the driver to the docker daemon
 type Driver struct {
 	manager.Driver
 	client      *dockerEngine.Client
@@ -23,6 +24,7 @@ type Driver struct {
 	hostVolume  string
 }
 
+// New returns a pointer to an instance of Driver and an error
 func New(host, apiVersion, maestroVersion string) (*Driver, error) {
 	dClient, dockerErr := dockerEngine.NewEnvClient()
 	if dockerErr != nil {
@@ -156,6 +158,7 @@ func (d *Driver) start(ctx context.Context) error {
 	return d.client.ContainerStart(ctx, d.containerID, dockerTypes.ContainerStartOptions{})
 }
 
+// Run runs a maestro container on the docker daemon
 func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	d.containerID = fmt.Sprintf("maestro_%s", name)
 	d.confTarget = confTarget

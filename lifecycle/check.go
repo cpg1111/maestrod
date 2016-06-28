@@ -17,6 +17,7 @@ func confDir(confPath string) string {
 	return res
 }
 
+// Check checks the running queue for an available spot for the next entry from the waiting queue
 func Check(conf *config.Config, queue *Queue, running *Running, manager manager.Driver, errChan chan error) {
 	next := queue.Pop(running, conf.Server.MaxBuilds)
 	if next != nil {
