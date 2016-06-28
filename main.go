@@ -4,9 +4,13 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/cpg1111/maestrod/config"
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/lifecycle"
+	"github.com/cpg1111/maestrod/manager"
+	"github.com/cpg1111/maestrod/manager/docker"
 	"github.com/cpg1111/maestrod/server"
 )
 
@@ -19,7 +23,7 @@ var (
 	datastoreType = flag.String("datastore-type", "redis", "type of data store to persist configuration in, defaults to redis")
 )
 
-func main() {
+func getConf() *config.Config {
 	flag.Parse()
 	conf, loadErr := config.Load(*configPath)
 	if loadErr != nil {
@@ -37,6 +41,10 @@ func main() {
 	if *datastoreType != "" {
 		conf.Server.DataStoreType = *datastoreType
 	}
+	return conf
+}
+
+func getDataStore(conf *config.Config) *datastore.Datastore {
 	var datastoreHost string
 	var datastorePort string
 	if conf.Server.DataStoreEnvIP != "" {
@@ -57,5 +65,35 @@ func main() {
 	default:
 		log.Fatal("specifcied datastore currently not supported, please create an issue @ https://github.com/cpg1111/maestrod")
 	}
-	server.Run(&conf.Server, &store)
+	return &store
+}
+
+func getManager(conf *config.Config) manager.Driver {
+	switch conf.Server.Runtime {
+	case "docker":
+		driver, dErr := docker.New(conf.Server.TargetHost, "v1.23", conf.Server.MaestroVersion)
+		if dErr != nil {
+			log.Fatal(dErr)
+		}
+		return *driver
+	default:
+		log.Fatal("specifcied runtime is not supported yet, please create an issue @ https://github.com/cpg1111/maestrod")
+	}
+	return nil
+}
+
+func main() {
+	conf := getConf()
+	store := getDataStore(conf)
+	server.Run(&conf.Server, store)
+	queue := lifecycle.NewQueue(store)
+	running := &lifecycle.Running{}
+	managerDriver := getManager(conf)
+	errChan := make(chan error)
+	var err error
+	for err == nil {
+		go lifecycle.Check(conf, queue, running, managerDriver, errChan)
+		err = <-errChan
+		time.Sleep(3 * time.Second)
+	}
 }

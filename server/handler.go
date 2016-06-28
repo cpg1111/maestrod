@@ -56,13 +56,15 @@ func Run(conf *config.Server, dstore *datastore.Datastore) (*http.ServeMux, erro
 	server := http.NewServeMux()
 	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	indexHandler := NewIndexHandler()
+	projectHandler := NewProjectHandler()
 	server.Handle("/", indexHandler)
+	server.Handle("/project", projectHandler)
 	if conf.RuntimeTLSServer {
 		log.Println("serving securely at ", addr)
-		http.ListenAndServeTLS(addr, conf.ServerCertPath, conf.ServerKeyPath, server)
+		go http.ListenAndServeTLS(addr, conf.ServerCertPath, conf.ServerKeyPath, server)
 	} else {
 		log.Println("serving insecurely at ", addr)
-		http.ListenAndServe(addr, server)
+		go http.ListenAndServe(addr, server)
 	}
 	return server, nil
 }
