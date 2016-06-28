@@ -10,6 +10,7 @@ type Server struct {
 	Runtime             string
 	RuntimeTLSClient    bool
 	RuntimeTLSServer    bool
+	MaxBuilds           int
 	DataStoreType       string
 	DataStoreUser       string
 	DataStorePWD        string

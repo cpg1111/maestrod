@@ -12,6 +12,7 @@ var expected = &Config{
 		Runtime:          "docker",
 		RuntimeTLSClient: true,
 		RuntimeTLSServer: true,
+		MaxBuilds:        6,
 		DataStoreType:    "redis",
 		DataStoreUser:    "",
 		DataStorePWD:     "",
