@@ -66,12 +66,22 @@ func Run(conf *config.Server, dstore *datastore.Datastore, queue *lifecycle.Queu
 		iAddr := fmt.Sprintf("%s:%d", conf.Host, conf.InsecurePort)
 		log.Println("serving securely at ", sAddr)
 		log.Println("redirecting insecure traffic at ", iAddr)
-		go http.ListenAndServeTLS(sAddr, conf.ServerCertPath, conf.ServerKeyPath, server)
+		go func() {
+			srvErr := http.ListenAndServeTLS(sAddr, conf.ServerCertPath, conf.ServerKeyPath, server)
+			if srvErr != nil {
+				panic(srvErr)
+			}
+		}()
 		go redirectInsecure(iAddr, conf.InsecurePort, conf.SecurePort)
 	} else {
 		addr := fmt.Sprintf("%s:%d", conf.Host, conf.InsecurePort)
 		log.Println("serving insecurely at ", addr)
-		go http.ListenAndServe(addr, server)
+		go func() {
+			srvErr := http.ListenAndServe(addr, server)
+			if srvErr != nil {
+				panic(srvErr)
+			}
+		}()
 	}
 	return server, nil
 }
