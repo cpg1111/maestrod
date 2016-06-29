@@ -35,3 +35,6 @@ clientcrt.pem
 clientkey.pem
 fullchain.pem
 privkey.pem
+
+# Build output
+dist/*
