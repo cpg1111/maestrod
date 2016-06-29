@@ -55,7 +55,6 @@ func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func Run(conf *config.Server, dstore *datastore.Datastore, queue *lifecycle.Queue) (*http.ServeMux, error) {
 	store = *dstore
 	server := http.NewServeMux()
-	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	indexHandler := NewIndexHandler()
 	projectHandler := NewProjectHandler()
 	pushHandler := NewPushHandler(queue)
@@ -63,9 +62,14 @@ func Run(conf *config.Server, dstore *datastore.Datastore, queue *lifecycle.Queu
 	server.Handle(projectHandler.Route, projectHandler)
 	server.Handle(pushHandler.Route, pushHandler)
 	if conf.RuntimeTLSServer {
-		log.Println("serving securely at ", addr)
-		go http.ListenAndServeTLS(addr, conf.ServerCertPath, conf.ServerKeyPath, server)
+		sAddr := fmt.Sprintf("%s:%d", conf.Host, conf.SecurePort)
+		iAddr := fmt.Sprintf("%s:%d", conf.Host, conf.InsecurePort)
+		log.Println("serving securely at ", sAddr)
+		log.Println("redirecting insecure traffic at ", iAddr)
+		go http.ListenAndServeTLS(sAddr, conf.ServerCertPath, conf.ServerKeyPath, server)
+		go redirectInsecure(iAddr, conf.InsecurePort, conf.SecurePort)
 	} else {
+		addr := fmt.Sprintf("%s:%d", conf.Host, conf.InsecurePort)
 		log.Println("serving insecurely at ", addr)
 		go http.ListenAndServe(addr, server)
 	}

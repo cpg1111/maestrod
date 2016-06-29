@@ -25,7 +25,8 @@ type Server struct {
 	ServerKeyPath       string
 	MaestroVersion      string
 	Host                string
-	Port                uint
+	SecurePort          uint
+	InsecurePort        uint
 	WorkspaceDir        string
 }
 

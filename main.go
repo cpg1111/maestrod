@@ -33,7 +33,7 @@ func getConf() *config.Config {
 		conf.Server.Host = *hostIP
 	}
 	if *port != 0 {
-		conf.Server.Port = *port
+		conf.Server.InsecurePort = *port
 	}
 	if *workspaceDir != "" {
 		conf.Server.WorkspaceDir = *workspaceDir
