@@ -26,7 +26,8 @@ var expected = &Config{
 		ServerCertPath:   "./fullchain.pem",
 		ServerKeyPath:    "./privkey.pem",
 		Host:             "0.0.0.0",
-		Port:             8484,
+		SecurePort:       8484,
+		InsecurePort:     8585,
 		WorkspaceDir:     "/tmp/",
 	},
 	Projects: []Project{
