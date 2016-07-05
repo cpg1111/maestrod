@@ -31,7 +31,7 @@ type RouteHandler struct {
 
 // ServeHTTP serves http responses
 func (rh RouteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	log.Println("Request: ", *req)
+	log.Println("Request: ", req.RemoteAddr, req.Method, req.RequestURI)
 	switch req.Method {
 	case "GET":
 		rh.sub.Get(res, req)
