@@ -10,7 +10,8 @@ import (
 type QueueEntry struct {
 	Project    string
 	Branch     string
-	Commit     string
+	PrevCommit string
+	CurrCommit string
 	CreatedAt  time.Time
 	FinishedAt time.Time
 	Status     string
@@ -40,13 +41,14 @@ func (q *Queue) set(queue []*QueueEntry) {
 }
 
 // Add adds a project to the queue
-func (q *Queue) Add(proj, branch, commit string) {
+func (q *Queue) Add(proj, branch, prevCommit, currCommit string) {
 	newEntry := &QueueEntry{
-		Project:   proj,
-		Branch:    branch,
-		Commit:    commit,
-		CreatedAt: time.Now(),
-		Status:    "queued",
+		Project:    proj,
+		Branch:     branch,
+		PrevCommit: prevCommit,
+		CurrCommit: currCommit,
+		CreatedAt:  time.Now(),
+		Status:     "queued",
 	}
 	q.Queue = append(q.Queue, newEntry)
 }

@@ -20,6 +20,6 @@ InsecurePort=8585
 WorkspaceDir="/tmp/"
 
 [[Projects]]
-Name="maestrod"
+Name="cpg1111/maestrod"
 MaestroConfPath="../maestro/test_conf.toml"
 DeployBranches=["master"]

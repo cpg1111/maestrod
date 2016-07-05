@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 
@@ -92,7 +93,8 @@ func (p PushSubHandler) Post(res http.ResponseWriter, req *http.Request) {
 	payload := &pushPayload{}
 	decoder.Decode(payload)
 	branchName := strings.Replace(payload.Ref, "refs/heads/", "", -1)
-	p.Queue.Add(payload.Repository.FullName, branchName, payload.Before)
+	log.Println("Adding Job to Queue: ", payload.Repository.FullName, branchName, payload.Before)
+	p.Queue.Add(payload.Repository.FullName, branchName, payload.Before, payload.After)
 	resp := postResp{Status: 201, Message: "Created"}
 	json.NewEncoder(res).Encode(resp)
 }

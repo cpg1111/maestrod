@@ -89,11 +89,10 @@ func main() {
 	server.Run(&conf.Server, store, queue)
 	running := &lifecycle.Running{}
 	managerDriver := getManager(conf)
-	errChan := make(chan error)
 	var err error
 	for err == nil {
-		go lifecycle.Check(conf, queue, running, managerDriver, errChan)
-		err = <-errChan
+		err = lifecycle.Check(conf, queue, running, managerDriver)
 		time.Sleep(3 * time.Second)
 	}
+	log.Fatal(err)
 }
