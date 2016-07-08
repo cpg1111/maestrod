@@ -215,6 +215,30 @@
 			"revisionTime": "2016-02-20T15:49:07Z"
 		},
 		{
+			"checksumSHA1": "o+ZqT87RLprKCGKMboo5vCxdAvA=",
+			"path": "gopkg.in/mgo.v2",
+			"revision": "29cc868a5ca65f401ff318143f9408d02f4799cc",
+			"revisionTime": "2016-06-09T18:00:28Z"
+		},
+		{
+			"checksumSHA1": "zTjQOFGy4XTv4L33Kd2FhrV+mbM=",
+			"path": "gopkg.in/mgo.v2/bson",
+			"revision": "29cc868a5ca65f401ff318143f9408d02f4799cc",
+			"revisionTime": "2016-06-09T18:00:28Z"
+		},
+		{
+			"checksumSHA1": "CkCDTsyN2Lbj1cL8+oaYKoPpI9w=",
+			"path": "gopkg.in/mgo.v2/internal/sasl",
+			"revision": "29cc868a5ca65f401ff318143f9408d02f4799cc",
+			"revisionTime": "2016-06-09T18:00:28Z"
+		},
+		{
+			"checksumSHA1": "+1WDRPaOphSCmRMxVPIPBV4aubc=",
+			"path": "gopkg.in/mgo.v2/internal/scram",
+			"revision": "29cc868a5ca65f401ff318143f9408d02f4799cc",
+			"revisionTime": "2016-06-09T18:00:28Z"
+		},
+		{
 			"checksumSHA1": "/EL/UuzIPObHgESjkBMaD4gaXOw=",
 			"path": "gopkg.in/redis.v3",
 			"revision": "b5e368500d0a508ef8f16e9c2d4025a8a46bcc29",

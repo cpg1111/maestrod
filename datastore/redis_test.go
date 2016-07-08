@@ -33,7 +33,7 @@ func saveContent(t *testing.T, key, val string) {
 	}
 }
 
-func TestSave(t *testing.T) {
+func TestRedisSave(t *testing.T) {
 	doneChan := make(chan bool)
 	store.Save("testSaveData", "test", func(err error) {
 		if err != nil {
@@ -49,7 +49,7 @@ func TestSave(t *testing.T) {
 	_ = <-doneChan
 }
 
-func TestFind(t *testing.T) {
+func TestRedisFind(t *testing.T) {
 	doneChan := make(chan bool)
 	saveContent(t, "testFindData", "test")
 	store.Find("testFindData", func(res interface{}, err error) {
@@ -66,7 +66,7 @@ func TestFind(t *testing.T) {
 	_ = <-doneChan
 }
 
-func TestRemove(t *testing.T) {
+func TestRedisRemove(t *testing.T) {
 	doneChan := make(chan bool)
 	saveContent(t, "testRemoveData", "test")
 	store.Remove("testRemoveData", func(err error) {
@@ -86,7 +86,7 @@ func TestRemove(t *testing.T) {
 	_ = <-doneChan
 }
 
-func TestUpdate(t *testing.T) {
+func TestRedisUpdate(t *testing.T) {
 	doneChan := make(chan bool)
 	saveContent(t, "testUpdateData", "test")
 	store.Update("testUpdateData", "updated_test", func(err error) {
@@ -111,7 +111,7 @@ func TestUpdate(t *testing.T) {
 	_ = <-doneChan
 }
 
-func TestFindAndUpdate(t *testing.T) {
+func TestRedisFindAndUpdate(t *testing.T) {
 	doneChan := make(chan bool)
 	saveContent(t, "testFindUpdateData", "test")
 	store.FindAndUpdate("testFindUpdateData", "updated_test", func(res interface{}, err error) {
