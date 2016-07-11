@@ -70,7 +70,7 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 		return marshErr
 	}
 	bodyReader := bytes.NewReader(body)
-	res, postErr := http.Post("%s/api/v1/namespaces/maestro/pods", "application/json", bodyReader)
+	res, postErr := http.Post(fmt.Sprintf("%s/api/v1/namespaces/maestro/pods", d.Host), "application/json", bodyReader)
 	if postErr != nil {
 		return postErr
 	}
