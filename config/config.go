@@ -6,6 +6,17 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+type Mount struct {
+	Kind      string
+	ID        string
+	FSType    string
+	Server    string
+	Endpoints string
+	Path      string
+	Name      string
+	ReadOnly  bool
+}
+
 type Server struct {
 	Runtime             string
 	RuntimeTLSClient    bool
@@ -40,6 +51,7 @@ type Project struct {
 type Config struct {
 	Server   Server
 	Projects []Project
+	Mounts   []Mount
 }
 
 // Load loads a config file and returns a pointer to a config struct
