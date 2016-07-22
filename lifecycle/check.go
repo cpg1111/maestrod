@@ -44,7 +44,7 @@ func Check(conf *config.Config, queue *Queue, running *Running, manager manager.
 					fmt.Sprintf("--deploy=%v", shouldDeploy),
 					fmt.Sprintf("--prev-commit=%s", next.PrevCommit),
 					fmt.Sprintf("--curr-commit=%s", next.CurrCommit),
-					fmt.Sprintf("--config=%s", conf.Projects[i].MaestroConfPath),
+					fmt.Sprintf("--config=%s", confPath),
 					fmt.Sprintf("--clone-path=%s", conf.Server.WorkspaceDir),
 				})
 				return runErr
