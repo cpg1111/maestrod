@@ -1,4 +1,4 @@
-package datastore
+package redis
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var store = NewRedis(os.Getenv("REDIS_SERVICE_HOST"), os.Getenv("REDIS_SERVICE_PORT"), "")
+var store = New(os.Getenv("REDIS_SERVICE_HOST"), os.Getenv("REDIS_SERVICE_PORT"), "")
 
 type redisResult struct {
 	Data interface{}
