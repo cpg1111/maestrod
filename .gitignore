@@ -38,3 +38,6 @@ privkey.pem
 
 # Build output
 dist/*
+
+# Vim swp files
+**/*.swp

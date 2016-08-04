@@ -39,41 +39,51 @@ func NewV2(host, port string) (*Etcd2, error) {
 }
 
 func (e Etcd2) Save(key string, data interface{}, callback datastore.NoResultCallback) {
-	value, marshErr := json.Marshal(data)
-	if marshErr != nil {
-		callback(marshErr)
-		return
-	}
-	_, setErr := e.Key.Set(context.Background(), key, (string)(value), nil)
-	callback(setErr)
+	go func() {
+		value, marshErr := json.Marshal(data)
+		if marshErr != nil {
+			callback(marshErr)
+			return
+		}
+		_, setErr := e.Key.Set(context.Background(), key, (string)(value), nil)
+		callback(setErr)
+	}()
 }
 
 func (e Etcd2) Find(queryStr string, callback datastore.ResultCallback) {
-	resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
-	callback(resp, getErr)
+	go func() {
+		resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
+		callback(resp.Node.Value, getErr)
+	}()
 }
 
 func (e Etcd2) Remove(queryStr string, callback datastore.NoResultCallback) {
-	_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
-	callback(delErr)
+	go func() {
+		_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
+		callback(delErr)
+	}()
 }
 
 func (e Etcd2) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
-	value, marshErr := json.Marshal(update)
-	if marshErr != nil {
-		callback(marshErr)
-		return
-	}
-	_, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
-	callback(updateErr)
+	go func() {
+		value, marshErr := json.Marshal(update)
+		if marshErr != nil {
+			callback(marshErr)
+			return
+		}
+		_, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
+		callback(updateErr)
+	}()
 }
 
 func (e Etcd2) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
-	value, marshErr := json.Marshal(update)
-	if marshErr != nil {
-		callback(nil, marshErr)
-		return
-	}
-	resp, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
-	callback(resp.Node.Value, updateErr)
+	go func() {
+		value, marshErr := json.Marshal(update)
+		if marshErr != nil {
+			callback(nil, marshErr)
+			return
+		}
+		resp, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
+		callback(resp.Node.Value, updateErr)
+	}()
 }
