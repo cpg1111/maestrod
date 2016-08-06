@@ -12,13 +12,13 @@ import (
 
 type Etcd3 struct {
 	datastore.Datastore
-	Client etcdv3.Client
+	Client *etcdv3.Client
 	Key    etcdv3.KV
 }
 
 func NewV3(host, port string) (*Etcd3, error) {
 	cfg := etcdv3.Config{
-		Endpoints:   []string{getEndpoints(host, port)},
+		Endpoints:   []string{getEndpoint(host, port)},
 		DialTimeout: time.Second,
 	}
 	client, clientErr := etcdv3.New(cfg)
@@ -28,7 +28,7 @@ func NewV3(host, port string) (*Etcd3, error) {
 	return &Etcd3{
 		Client: client,
 		Key:    etcdv3.NewKV(client),
-	}
+	}, nil
 }
 
 func (e Etcd3) Save(key string, data interface{}, callback datastore.NoResultCallback) {
@@ -37,19 +37,19 @@ func (e Etcd3) Save(key string, data interface{}, callback datastore.NoResultCal
 		callback(marshErr)
 		return
 	}
-	_, putErr := e.Key.Put(context.Background(), key, value, nil)
+	_, putErr := e.Key.Put(context.Background(), key, (string)(value), nil)
 	callback(putErr)
 }
 
 func (e Etcd3) Find(queryStr string, callback datastore.ResultCallback) {
-	resp, respErr := e.Key.Get(context.Background(), queryString, nil)
+	resp, respErr := e.Key.Get(context.Background(), queryStr, nil)
 	if respErr != nil {
 		callback(nil, respErr)
 		return
 	}
 	var values []interface{}
 	for i := range resp.Kvs {
-		if i == queryString {
+		if (string)(resp.Kvs[i].Key) == queryStr {
 			values := append(values, resp.Kvs[i])
 		}
 	}

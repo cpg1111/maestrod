@@ -51,5 +51,30 @@ func TestEtcd3Find(t *testing.T) {
 		t.Error(etcd3Err)
 		return
 	}
-
+	testData := &EtcdV3TestData{
+		Message: "test",
+	}
+	testValue, marshErr := json.Marshal(testData)
+	_, putErr := etcd3.Key.Put(context.Background(), "testFind", testValue, nil)
+	if putErr != nil {
+		t.Error(putErr)
+	}
+	done := make(chan bool)
+	etcd3.Find("testFind", func(val interface{}, err error) {
+		if err != nil {
+			t.Error(err)
+			done <- true
+		}
+		result := &EtcdV3TestData{}
+		unmarshErr := json.Unmarshal(([]byte)(val), result)
+		if unmarshErr != nil {
+			t.Error(unmarshErr)
+		}
+		if result.Message != "test" {
+			t.Errorf("expected test, found %s", result.Message)
+			done <- true
+		}
+		done <- true
+	})
+	_ = <-done
 }
