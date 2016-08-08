@@ -23,13 +23,16 @@ func TestEtcd3Save(t *testing.T) {
 		Message: "test",
 	}
 	testValue, marshErr := json.Marshal(testData)
+	if marshErr != nil {
+		t.Error(marshErr)
+	}
 	done := make(chan bool)
-	etcd3.Save("testFind", testValue, func(err error) {
+	etcd3.Save("testFind", (string)(testValue), func(err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
 		}
-		resp, respErr := etcd.Key.Get(context.Background(), "testFind", nil)
+		resp, respErr := etcd3.Key.Get(context.Background(), "testFind", nil)
 		if respErr != nil {
 			t.Error(respErr)
 			done <- true
@@ -55,18 +58,21 @@ func TestEtcd3Find(t *testing.T) {
 		Message: "test",
 	}
 	testValue, marshErr := json.Marshal(testData)
-	_, putErr := etcd3.Key.Put(context.Background(), "testFind", testValue, nil)
+	if marshErr != nil {
+		t.Error(marshErr)
+	}
+	_, putErr := etcd3.Key.Put(context.Background(), "testFind", (string)(testValue), nil)
 	if putErr != nil {
 		t.Error(putErr)
 	}
 	done := make(chan bool)
-	etcd3.Find("testFind", func(val interface{}, err error) {
+	etcd3.Find("testFind", func(val []byte, err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
 		}
 		result := &EtcdV3TestData{}
-		unmarshErr := json.Unmarshal(([]byte)(val), result)
+		unmarshErr := json.Unmarshal(val, result)
 		if unmarshErr != nil {
 			t.Error(unmarshErr)
 		}

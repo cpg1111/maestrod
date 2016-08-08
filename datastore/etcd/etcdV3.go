@@ -32,56 +32,63 @@ func NewV3(host, port string) (*Etcd3, error) {
 }
 
 func (e Etcd3) Save(key string, data interface{}, callback datastore.NoResultCallback) {
-	value, marshErr := json.Marshal(data)
-	if marshErr != nil {
-		callback(marshErr)
-		return
-	}
-	_, putErr := e.Key.Put(context.Background(), key, (string)(value), nil)
-	callback(putErr)
+	go func() {
+		value, marshErr := json.Marshal(data)
+		if marshErr != nil {
+			callback(marshErr)
+			return
+		}
+		_, putErr := e.Key.Put(context.Background(), key, (string)(value), nil)
+		callback(putErr)
+	}()
 }
 
 func (e Etcd3) Find(queryStr string, callback datastore.ResultCallback) {
-	resp, respErr := e.Key.Get(context.Background(), queryStr, nil)
-	if respErr != nil {
-		callback(nil, respErr)
-		return
-	}
-	var values []interface{}
-	for i := range resp.Kvs {
-		if (string)(resp.Kvs[i].Key) == queryStr {
-			values := append(values, resp.Kvs[i])
+	go func() {
+		resp, respErr := e.Key.Get(context.Background(), queryStr, nil)
+		if respErr != nil {
+			callback(nil, respErr)
+			return
 		}
-	}
-	callback(values, nil)
+		callback(resp.Kvs[0].Value, nil)
+	}()
 }
 
 func (e Etcd3) Remove(queryStr string, callback datastore.NoResultCallback) {
-	_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
-	callback(delErr)
+	go func() {
+		_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
+		callback(delErr)
+	}()
 }
 
 func (e Etcd3) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
-	value, marshErr := json.Marshal(update)
-	if marshErr != nil {
-		callback(marshErr)
-		return
-	}
-	_, updateErr := e.Key.Put(context.Background(), queryStr, value, nil)
-	callback(updateErr)
+	go func() {
+		value, marshErr := json.Marshal(update)
+		if marshErr != nil {
+			callback(marshErr)
+			return
+		}
+		_, updateErr := e.Key.Put(context.Background(), queryStr, (string)(value), nil)
+		callback(updateErr)
+	}()
 }
 
 func (e Etcd3) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
-	value, marshErr := json.Marshal(update)
-	if marshErr != nil {
-		callback(nil, marshErr)
-		return
-	}
-	resp, updateErr := e.Key.Put(context.Background(), queryString, value, nil)
-	var values []interface{}
-	for i := range resp.Kvs {
-		if i == queryString {
-			values := append(values, resp.Kvs[i])
+	go func() {
+		value, marshErr := json.Marshal(update)
+		if marshErr != nil {
+			callback(nil, marshErr)
+			return
 		}
-	}
+		_, updateErr := e.Key.Put(context.Background(), queryStr, (string)(value), nil)
+		if updateErr != nil {
+			callback(nil, updateErr)
+			return
+		}
+		resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
+		if getErr != nil {
+			callback(nil, getErr)
+		}
+		callback(resp.Kvs[0].Value, nil)
+	}()
 }

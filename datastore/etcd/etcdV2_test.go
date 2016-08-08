@@ -30,13 +30,13 @@ func TestEtcd2Save(t *testing.T) {
 			done <- true
 		}
 		result := &Etcd2TestData{}
-		unmarshErr := json.Unmarshal(resp.Node.Value, result)
+		unmarshErr := json.Unmarshal(([]byte)(resp.Node.Value), result)
 		if unmarshErr != nil {
 			t.Error(unmarshErr)
 			done <- true
 		}
 		if result.Message != "test" {
-			t.Errorf("Expected test, found %s", (resp.Node.Value.(Etcd2TestData)).Message)
+			t.Errorf("Expected test, found %s", result.Message)
 			done <- true
 		}
 		done <- true
@@ -56,14 +56,18 @@ func TestEtcd2Find(t *testing.T) {
 	if setErr != nil {
 		t.Error(setErr)
 	}
-	done := make(chan error)
-	etcd.Find("testFind", func(val string, err error) {
+	done := make(chan bool)
+	etcd.Find("testFind", func(val []byte, err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
 		}
 		result := &Etcd2TestData{}
-		unmarshErr := json.Unmarshal(([]byte)(val), result)
+		unmarshErr := json.Unmarshal(val, result)
+		if unmarshErr != nil {
+			t.Error(unmarshErr)
+			done <- true
+		}
 		if result.Message != "test" {
 			t.Errorf("expected test foudn %s", result.Message)
 			done <- true
@@ -121,6 +125,9 @@ func TestEtcd2Update(t *testing.T) {
 		Message: "update",
 	}
 	newValue, newMarshErr := json.Marshal(newData)
+	if newMarshErr != nil {
+		t.Error(newMarshErr)
+	}
 	done := make(chan bool)
 	etcd.Update("testUpdate", newValue, func(err error) {
 		if err != nil {
@@ -134,6 +141,10 @@ func TestEtcd2Update(t *testing.T) {
 		}
 		result := &Etcd2TestData{}
 		unmarshErr := json.Unmarshal(([]byte)(res.Node.Value), result)
+		if unmarshErr != nil {
+			t.Error(unmarshErr)
+			done <- true
+		}
 		if result.Message != "update" {
 			t.Errorf("expected update, found %s", result.Message)
 			done <- true
@@ -158,14 +169,20 @@ func TestEtcd2FindAndUpdate(t *testing.T) {
 		Message: "update",
 	}
 	newValue, newMarshErr := json.Marshal(newData)
+	if newMarshErr != nil {
+		t.Error(newMarshErr)
+	}
 	done := make(chan bool)
-	etcd.FindAndUpdate("testUpdate", newValue, func(val string, err error) {
+	etcd.FindAndUpdate("testUpdate", newValue, func(val []byte, err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
 		}
 		result := &Etcd2TestData{}
-		unmarshErr := json.Unmarshal(([]byte)(val), result)
+		unmarshErr := json.Unmarshal(val, result)
+		if unmarshErr != nil {
+			t.Error(unmarshErr)
+		}
 		if result.Message != "update" {
 			t.Errorf("expected 'update', but found %s", result.Message)
 			done <- true

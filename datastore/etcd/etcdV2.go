@@ -18,7 +18,7 @@ type Etcd2 struct {
 }
 
 func getEndpoint(host, port string) string {
-	return fmt.Sprintf("%s:%s", host, port)
+	return fmt.Sprintf("http://%s:%s", host, port)
 }
 
 func NewV2(host, port string) (*Etcd2, error) {
@@ -53,7 +53,7 @@ func (e Etcd2) Save(key string, data interface{}, callback datastore.NoResultCal
 func (e Etcd2) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
 		resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
-		callback(resp.Node.Value, getErr)
+		callback(([]byte)(resp.Node.Value), getErr)
 	}()
 }
 
@@ -84,6 +84,6 @@ func (e Etcd2) FindAndUpdate(queryStr string, update interface{}, callback datas
 			return
 		}
 		resp, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
-		callback(resp.Node.Value, updateErr)
+		callback(([]byte)(resp.Node.Value), updateErr)
 	}()
 }
