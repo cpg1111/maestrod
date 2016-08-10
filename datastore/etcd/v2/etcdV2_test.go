@@ -3,6 +3,7 @@ package etcd
 import (
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 
 	"golang.org/x/net/context"
@@ -18,13 +19,14 @@ func TestEtcd2Save(t *testing.T) {
 	if etcdErr != nil {
 		t.Error(etcdErr)
 	}
+	_, _ = etcd.Key.Delete(context.Background(), "testSave", nil)
 	done := make(chan bool)
-	etcd.Save("test", Etcd2TestData{Message: "test"}, func(err error) {
+	etcd.Save("testSave", Etcd2TestData{Message: "test"}, func(err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
 		}
-		resp, respErr := etcd.Key.Get(context.Background(), "test", nil)
+		resp, respErr := etcd.Key.Get(context.Background(), "testSave", nil)
 		if respErr != nil {
 			t.Error(respErr)
 			done <- true
@@ -48,11 +50,12 @@ func TestEtcd2Find(t *testing.T) {
 	testData := &Etcd2TestData{
 		Message: "test",
 	}
+	_, _ = etcd.Key.Delete(context.Background(), "testFind", nil)
 	testValue, marshErr := json.Marshal(testData)
 	if marshErr != nil {
 		t.Error(marshErr)
 	}
-	_, setErr := etcd.Key.Set(context.Background(), "testFind", (string)(testValue), nil)
+	_, setErr := etcd.Key.Create(context.Background(), "testFind", (string)(testValue))
 	if setErr != nil {
 		t.Error(setErr)
 	}
@@ -81,6 +84,7 @@ func TestEtcd2Remove(t *testing.T) {
 	testData := &Etcd2TestData{
 		Message: "test",
 	}
+	_, _ = etcd.Key.Delete(context.Background(), "testRemove", nil)
 	testValue, marshErr := json.Marshal(testData)
 	if marshErr != nil {
 		t.Error(marshErr)
@@ -96,11 +100,12 @@ func TestEtcd2Remove(t *testing.T) {
 			done <- true
 		}
 		res, resErr := etcd.Key.Get(context.Background(), "testRemove", nil)
-		if resErr != nil {
+		correctErr := strings.Index(resErr.Error(), "Key not found") > -1
+		if resErr != nil && !correctErr {
 			t.Error(resErr)
 			done <- true
 		}
-		if res.Node.Value != "" {
+		if res != nil && res.Node != nil && res.Node.Value != "" {
 			t.Error("did not remove value testRemove from etcd")
 			done <- true
 		}
@@ -113,34 +118,32 @@ func TestEtcd2Update(t *testing.T) {
 	testData := &Etcd2TestData{
 		Message: "test",
 	}
+	_, _ = etcd.Key.Delete(context.Background(), "testUpdate", nil)
 	testValue, marshErr := json.Marshal(testData)
 	if marshErr != nil {
 		t.Error(marshErr)
 	}
-	_, setErr := etcd.Key.Set(context.Background(), "testUpdate", (string)(testValue), nil)
+	_, setErr := etcd.Key.Create(context.Background(), "testUpdate", (string)(testValue))
 	if setErr != nil {
 		t.Error(setErr)
 	}
 	newData := &Etcd2TestData{
 		Message: "update",
 	}
-	newValue, newMarshErr := json.Marshal(newData)
-	if newMarshErr != nil {
-		t.Error(newMarshErr)
-	}
 	done := make(chan bool)
-	etcd.Update("testUpdate", newValue, func(err error) {
+	t.Log(newData)
+	etcd.Update("testUpdate", newData, func(err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
 		}
-		res, resErr := etcd.Key.Get(context.Background(), "testUpdate", nil)
+		resp, resErr := etcd.Key.Get(context.Background(), "testUpdate", nil)
 		if resErr != nil {
 			t.Error(resErr)
 			done <- true
 		}
 		result := &Etcd2TestData{}
-		unmarshErr := json.Unmarshal(([]byte)(res.Node.Value), result)
+		unmarshErr := json.Unmarshal(([]byte)(resp.Node.Value), result)
 		if unmarshErr != nil {
 			t.Error(unmarshErr)
 			done <- true
@@ -151,29 +154,27 @@ func TestEtcd2Update(t *testing.T) {
 		}
 		done <- true
 	})
+	_ = <-done
 }
 
 func TestEtcd2FindAndUpdate(t *testing.T) {
 	testData := &Etcd2TestData{
 		Message: "test",
 	}
+	_, _ = etcd.Key.Delete(context.Background(), "testFindUpdate", nil)
 	testValue, marshErr := json.Marshal(testData)
 	if marshErr != nil {
 		t.Error(marshErr)
 	}
-	_, setErr := etcd.Key.Set(context.Background(), "testFindUpdate", (string)(testValue), nil)
+	_, setErr := etcd.Key.Create(context.Background(), "testFindUpdate", (string)(testValue))
 	if setErr != nil {
 		t.Error(setErr)
 	}
 	newData := &Etcd2TestData{
 		Message: "update",
 	}
-	newValue, newMarshErr := json.Marshal(newData)
-	if newMarshErr != nil {
-		t.Error(newMarshErr)
-	}
 	done := make(chan bool)
-	etcd.FindAndUpdate("testUpdate", newValue, func(val []byte, err error) {
+	etcd.FindAndUpdate("testUpdate", newData, func(val []byte, err error) {
 		if err != nil {
 			t.Error(err)
 			done <- true
@@ -189,5 +190,5 @@ func TestEtcd2FindAndUpdate(t *testing.T) {
 		}
 		done <- true
 	})
-	done <- true
+	_ = <-done
 }
