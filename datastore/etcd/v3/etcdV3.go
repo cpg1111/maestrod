@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cpg1111/maestrod/datastore"
@@ -14,6 +15,10 @@ type Etcd3 struct {
 	datastore.Datastore
 	Client *etcdv3.Client
 	Key    etcdv3.KV
+}
+
+func getEndpoint(host, port string) string {
+	return fmt.Sprintf("http://%s:%s", host, port)
 }
 
 func NewV3(host, port string) (*Etcd3, error) {
@@ -38,14 +43,14 @@ func (e Etcd3) Save(key string, data interface{}, callback datastore.NoResultCal
 			callback(marshErr)
 			return
 		}
-		_, putErr := e.Key.Put(context.Background(), key, (string)(value), nil)
+		_, putErr := e.Key.Put(context.Background(), key, (string)(value))
 		callback(putErr)
 	}()
 }
 
 func (e Etcd3) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
-		resp, respErr := e.Key.Get(context.Background(), queryStr, nil)
+		resp, respErr := e.Key.Get(context.Background(), queryStr)
 		if respErr != nil {
 			callback(nil, respErr)
 			return
@@ -56,7 +61,8 @@ func (e Etcd3) Find(queryStr string, callback datastore.ResultCallback) {
 
 func (e Etcd3) Remove(queryStr string, callback datastore.NoResultCallback) {
 	go func() {
-		_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
+		_, delErr := e.Key.Delete(context.Background(), queryStr)
+		fmt.Println(delErr)
 		callback(delErr)
 	}()
 }
@@ -68,7 +74,7 @@ func (e Etcd3) Update(queryStr string, update interface{}, callback datastore.No
 			callback(marshErr)
 			return
 		}
-		_, updateErr := e.Key.Put(context.Background(), queryStr, (string)(value), nil)
+		_, updateErr := e.Key.Put(context.Background(), queryStr, (string)(value))
 		callback(updateErr)
 	}()
 }
@@ -80,12 +86,12 @@ func (e Etcd3) FindAndUpdate(queryStr string, update interface{}, callback datas
 			callback(nil, marshErr)
 			return
 		}
-		_, updateErr := e.Key.Put(context.Background(), queryStr, (string)(value), nil)
+		_, updateErr := e.Key.Put(context.Background(), queryStr, (string)(value))
 		if updateErr != nil {
 			callback(nil, updateErr)
 			return
 		}
-		resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
+		resp, getErr := e.Key.Get(context.Background(), queryStr)
 		if getErr != nil {
 			callback(nil, getErr)
 		}
