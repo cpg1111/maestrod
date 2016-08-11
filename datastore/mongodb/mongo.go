@@ -1,15 +1,17 @@
-package datastore
+package mongodb
 
 import (
 	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/cpg1111/maestrod/datastore"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
 type MongoStore struct {
-	Datastore
+	datastore.Datastore
 	store *mgo.Session
 	db    *mgo.Database
 }
@@ -21,7 +23,7 @@ type mongoQuery struct {
 
 type mongoRes struct{}
 
-func NewMongoStore(host, port, username, password string) (*MongoStore, error) {
+func New(host, port, username, password string) (*MongoStore, error) {
 	info := &mgo.DialInfo{
 		Addrs:    []string{fmt.Sprintf("%s:%s", host, port)},
 		Direct:   false,
@@ -49,7 +51,7 @@ func NewMongoStore(host, port, username, password string) (*MongoStore, error) {
 	}, nil
 }
 
-func (m MongoStore) Save(key string, data interface{}, callback NoResultCallback) {
+func (m MongoStore) Save(key string, data interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		collection := m.db.C(key)
 		queryErr := collection.Insert(data)
@@ -57,7 +59,7 @@ func (m MongoStore) Save(key string, data interface{}, callback NoResultCallback
 	}()
 }
 
-func (m MongoStore) Find(queryStr string, callback ResultCallback) {
+func (m MongoStore) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
 		query := &mongoQuery{}
 		unmarshErr := json.Unmarshal(([]byte)(queryStr), query)
@@ -73,7 +75,7 @@ func (m MongoStore) Find(queryStr string, callback ResultCallback) {
 	}()
 }
 
-func (m MongoStore) Remove(queryStr string, callback NoResultCallback) {
+func (m MongoStore) Remove(queryStr string, callback datastore.NoResultCallback) {
 	go func() {
 		query := &mongoQuery{}
 		unmarshErr := json.Unmarshal(([]byte)(queryStr), query)
@@ -87,7 +89,7 @@ func (m MongoStore) Remove(queryStr string, callback NoResultCallback) {
 	}()
 }
 
-func (m MongoStore) Update(queryStr string, update interface{}, callback NoResultCallback) {
+func (m MongoStore) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		query := &mongoQuery{}
 		unmarshErr := json.Unmarshal(([]byte)(queryStr), query)
@@ -101,7 +103,7 @@ func (m MongoStore) Update(queryStr string, update interface{}, callback NoResul
 	}()
 }
 
-func (m MongoStore) FindAndUpdate(queryStr string, update interface{}, callback ResultCallback) {
+func (m MongoStore) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
 	doneChan := make(chan bool)
 	go m.Update(queryStr, update, func(err error) {
 		if err != nil {

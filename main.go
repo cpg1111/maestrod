@@ -8,6 +8,9 @@ import (
 
 	"github.com/cpg1111/maestrod/config"
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/datastore/etcd"
+	"github.com/cpg1111/maestrod/datastore/mongodb"
+	"github.com/cpg1111/maestrod/datastore/redis"
 	"github.com/cpg1111/maestrod/lifecycle"
 	"github.com/cpg1111/maestrod/manager"
 	"github.com/cpg1111/maestrod/manager/docker"
@@ -60,7 +63,7 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 	var store datastore.Datastore
 	switch conf.Server.DataStoreType {
 	case "redis":
-		store = datastore.NewRedis(datastoreHost, datastorePort, conf.Server.DataStorePWD)
+		store = redis.New(datastoreHost, datastorePort, conf.Server.DataStorePWD)
 		log.Println("redis datastore created")
 	default:
 		log.Fatal("specifcied datastore currently not supported, please create an issue @ https://github.com/cpg1111/maestrod")

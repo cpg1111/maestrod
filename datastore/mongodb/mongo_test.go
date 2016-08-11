@@ -1,4 +1,4 @@
-package datastore
+package mongodb
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	mgo "gopkg.in/mgo.v2"
 )
 
-var mongo, mErr = NewMongoStore(os.Getenv("MONGO_SERVICE_HOST"), os.Getenv("MONGO_SERVICE_PORT"), "", "")
+var mongo, mErr = New(os.Getenv("MONGO_SERVICE_HOST"), os.Getenv("MONGO_SERVICE_PORT"), "", "")
 
 type testData struct {
 	Msg string `json:"msg", bson:"msg"`
