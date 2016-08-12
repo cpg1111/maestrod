@@ -41,3 +41,6 @@ dist/*
 
 # Vim swp files
 **/*.swp
+
+# dev deps
+**/dev_deps/*
