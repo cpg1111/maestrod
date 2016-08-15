@@ -52,12 +52,12 @@ func TestRedisSave(t *testing.T) {
 func TestRedisFind(t *testing.T) {
 	doneChan := make(chan bool)
 	saveContent(t, "testFindData", "test")
-	store.Find("testFindData", func(res interface{}, err error) {
+	store.Find("testFindData", func(res []byte, err error) {
 		if err != nil {
 			t.Error(err)
 		}
 		t.Log(res)
-		strRes := res.(string)
+		strRes := (string)(res)
 		if strRes != "test" {
 			t.Errorf("expected test, found %s on find", strRes)
 		}
@@ -114,11 +114,11 @@ func TestRedisUpdate(t *testing.T) {
 func TestRedisFindAndUpdate(t *testing.T) {
 	doneChan := make(chan bool)
 	saveContent(t, "testFindUpdateData", "test")
-	store.FindAndUpdate("testFindUpdateData", "updated_test", func(res interface{}, err error) {
+	store.FindAndUpdate("testFindUpdateData", "updated_test", func(res []byte, err error) {
 		if err != nil {
 			t.Error(err)
 		}
-		strRes := res.(string)
+		strRes := (string)(res)
 		if strRes != "{\"Data\":\"updated_test\"}" {
 			t.Errorf("expected updated_test found %s for findAndUpdate", strRes)
 		}

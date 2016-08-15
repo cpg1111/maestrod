@@ -71,7 +71,12 @@ func (m MongoStore) Find(queryStr string, callback datastore.ResultCallback) {
 		resQuery := collection.Find(query.Query)
 		res := &mongoRes{}
 		queryErr := resQuery.One(res)
-		callback(res, queryErr)
+		if queryErr != nil {
+			callback(nil, queryErr)
+			return
+		}
+		resBytes, unmarshErr := json.Marshal(res)
+		callback(resBytes, unmarshErr)
 	}()
 }
 

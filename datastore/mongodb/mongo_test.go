@@ -68,7 +68,7 @@ func TestMongoFind(t *testing.T) {
 	if queryErr != nil {
 		t.Error(queryErr)
 	}
-	mongo.Find(queryString, func(data interface{}, err error) {
+	mongo.Find(queryString, func(data []byte, err error) {
 		if err != nil {
 			t.Error(err)
 			doneChan <- true
@@ -151,7 +151,7 @@ func TestMongoFindAndUpdate(t *testing.T) {
 	if queryErr != nil {
 		t.Error(queryErr)
 	}
-	mongo.FindAndUpdate(queryString, testData{Msg: "hello findAndUpdate 2"}, func(res interface{}, err error) {
+	mongo.FindAndUpdate(queryString, testData{Msg: "hello findAndUpdate 2"}, func(res []byte, err error) {
 		if res == nil {
 			t.Error("did not find updated result")
 			doneChan <- true
