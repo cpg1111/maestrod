@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cpg1111/maestrod/config"
 	"github.com/cpg1111/maestrod/manager"
 )
 
@@ -14,12 +15,20 @@ type Driver struct {
 	manager.Driver
 	Host           string
 	MaestroVersion string
+	Client         *http.Client
 }
 
-func New(host, maestroVersion string) *Driver {
+func New(host, maestroVersion string, conf *config.Server) *Driver {
+	authTransport, authErr := NewAuthTransport(conf)
+	if authErr != nil {
+		panic(authErr)
+	}
 	return &Driver{
 		Host:           host,
 		MaestroVersion: maestroVersion,
+		Client: &http.Client{
+			Transport: authTransport,
+		},
 	}
 }
 
@@ -70,7 +79,7 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 		return marshErr
 	}
 	bodyReader := bytes.NewReader(body)
-	res, postErr := http.Post(fmt.Sprintf("%s/api/v1/namespaces/maestro/pods", d.Host), "application/json", bodyReader)
+	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces/maestro/pods", d.Host), "application/json", bodyReader)
 	if postErr != nil {
 		return postErr
 	}
