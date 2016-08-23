@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"testing"
 
@@ -39,7 +38,7 @@ func TestRun(t *testing.T) {
 		t.Error(runErr)
 	}
 	podURL := fmt.Sprintf("%s/namespaces/maestro/pods/test", K8S)
-	resp, getErr := http.Get(podURL)
+	resp, getErr := driver.Client.Get(podURL)
 	if getErr != nil {
 		t.Error(getErr)
 	}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/cpg1111/maestrod/config"
@@ -143,8 +142,8 @@ func (v *Volume) DelegateType(confTarget, confTargetPrefix string, volumeConf *c
 	}
 }
 
-func checkForVolume(host string, vol *Volume) (bool, error) {
-	res, getErr := http.Get(fmt.Sprintf("%s/api/v1/persistentVolume/%s", host, vol.Name))
+func checkForVolume(driver *Driver, vol *Volume) (bool, error) {
+	res, getErr := driver.Client.Get(fmt.Sprintf("%s/api/v1/persistentVolume/%s", driver.Host, vol.Name))
 	if getErr != nil {
 		return false, getErr
 	}
@@ -168,8 +167,8 @@ type createPayload struct {
 	Spec       interface{}     `json:"spec"`
 }
 
-func createVolume(host string, vol *Volume) error {
-	client := http.Client{}
+func createVolume(driver *Driver, vol *Volume) error {
+	client := driver.Client
 	payload := &createPayload{
 		Kind:       "persistentVolume",
 		APIVersion: "v1",
@@ -184,7 +183,7 @@ func createVolume(host string, vol *Volume) error {
 		return marshErr
 	}
 	bodyReader := bytes.NewReader(body)
-	res, postErr := client.Post(fmt.Sprintf("%s/api/v1/persistentVolumes/", host), "application/json", bodyReader)
+	res, postErr := client.Post(fmt.Sprintf("%s/api/v1/persistentVolumes/", driver.Host), "application/json", bodyReader)
 	if postErr != nil {
 		return postErr
 	}
@@ -207,16 +206,16 @@ func getVolume(name, confTarget string) Volume {
 	return vol
 }
 
-func NewVolume(name, confTarget, host string) (*Volume, error) {
+func NewVolume(name, confTarget string, driver *Driver) (*Volume, error) {
 	vol := getVolume(name, confTarget)
 	volPtr := &vol
 	if vol.Type != "hostPath" {
-		found, checkErr := checkForVolume(host, volPtr)
+		found, checkErr := checkForVolume(driver, volPtr)
 		if checkErr != nil {
 			return nil, checkErr
 		}
 		if !found {
-			createErr := createVolume(host, volPtr)
+			createErr := createVolume(driver, volPtr)
 			if createErr != nil {
 				return nil, createErr
 			}

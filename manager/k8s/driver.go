@@ -51,7 +51,7 @@ type Pod struct {
 }
 
 func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
-	confVol, volErr := NewVolume(fmt.Sprintf("%s_conf", name), hostVolume, d.Host)
+	confVol, volErr := NewVolume(fmt.Sprintf("%s_conf", name), hostVolume, d)
 	if volErr != nil {
 		return volErr
 	}
