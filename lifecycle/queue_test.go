@@ -5,9 +5,10 @@ import (
 	"testing"
 
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/datastore/redis"
 )
 
-var store = datastore.NewRedis(os.Getenv("REDIS_SERVICE_HOST"), os.Getenv("REDIS_SERVICE_PORT"), "")
+var store = redis.New(os.Getenv("REDIS_SERVICE_HOST"), os.Getenv("REDIS_SERVICE_PORT"), "")
 
 var castedStore = (datastore.Datastore)(*store)
 

@@ -5,13 +5,22 @@ import (
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/cpg1111/maestrod/config"
 )
 
 var K8S = os.Getenv("TEST_K8S_URL")
 
-var driver = New(K8S, os.Getenv("TEST_MAESTRO_VER"))
+var conf, confErr = config.Load(fmt.Sprintf("%s/src/github.com/cpg1111/maestrod/example.conf.toml", os.Getenv("GOPATH")))
+
+var driver = New(K8S, os.Getenv("TEST_MAESTRO_VER"), &conf.Server)
 
 func TestRun(t *testing.T) {
+	if confErr != nil {
+		t.Error(confErr)
+	}
+	conf.Server.ClientCertPath = os.Getenv("TEST_CLIENT_CERT")
+	conf.Server.ClientKeyPath = os.Getenv("TEST_CLIENT_KEY")
 	branch := os.Getenv("TEST_BRANCH")
 	confPath := os.Getenv("TEST_CONF_PATH")
 	prevCommit := os.Getenv("TEST_PREV_COMMIT")

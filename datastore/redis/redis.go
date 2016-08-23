@@ -58,7 +58,8 @@ func (r RedisStore) Save(key string, data interface{}, callback datastore.NoResu
 func (r RedisStore) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
 		cmd := r.store.Get(queryStr)
-		callback(cmd.Result())
+		res, resErr := cmd.Result()
+		callback(([]byte)(res), resErr)
 	}()
 }
 

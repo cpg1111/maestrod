@@ -160,34 +160,33 @@ func (d *Driver) start(ctx context.Context) error {
 
 // Run runs a maestro container on the docker daemon
 func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
-	d.containerID = fmt.Sprintf("maestro_%s", name)
+	d.containerID = fmt.Sprintf("maestro-%s", name)
 	d.confTarget = confTarget
 	d.hostVolume = hostVolume
 	d.cmd = args
-	ctx := context.Background()
-	needToPull, checkErr := d.needToPull(ctx)
+	needToPull, checkErr := d.needToPull(context.Background())
 	if checkErr != nil {
 		return checkErr
 	}
 	if needToPull {
-		pullErr := d.pull(ctx)
+		pullErr := d.pull(context.Background())
 		if pullErr != nil {
 			return pullErr
 		}
 	}
-	needToRemoveOld, removalID, checkRemoveErr := d.needToRemove(ctx)
+	needToRemoveOld, removalID, checkRemoveErr := d.needToRemove(context.Background())
 	if checkRemoveErr != nil {
 		return checkRemoveErr
 	}
 	if needToRemoveOld {
-		removeErr := d.remove(ctx, removalID)
+		removeErr := d.remove(context.Background(), removalID)
 		if removeErr != nil {
 			return removeErr
 		}
 	}
-	createErr := d.create(ctx)
+	createErr := d.create(context.Background())
 	if createErr != nil {
 		return createErr
 	}
-	return d.start(ctx)
+	return d.start(context.Background())
 }

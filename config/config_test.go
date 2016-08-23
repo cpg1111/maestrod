@@ -21,10 +21,10 @@ var expected = &Config{
 		DataStoreEnvPort: "REDIS_SERVICE_PORT",
 		TargetHost:       "",
 		MaestroVersion:   "0.1.1",
-		ClientCertPath:   "./clientcrt.pem",
-		ClientKeyPath:    "./clientkey.pem",
-		ServerCertPath:   "./fullchain.pem",
-		ServerKeyPath:    "./privkey.pem",
+		ClientCertPath:   "/etc/maestrod/clientcrt.pem",
+		ClientKeyPath:    "/etc/maestrod/clientkey.pem",
+		ServerCertPath:   "/etc/maestrod/fullchain.pem",
+		ServerKeyPath:    "/etc/maestrod/privkey.pem",
 		Host:             "0.0.0.0",
 		SecurePort:       8484,
 		InsecurePort:     8585,
@@ -33,7 +33,7 @@ var expected = &Config{
 	Projects: []Project{
 		Project{
 			Name:            "maestrod",
-			MaestroConfPath: "../maestro/test_conf.toml",
+			MaestroConfPath: "/etc/maestro/test_conf.toml",
 			DeployBranches:  []string{"master"},
 		},
 	},
@@ -61,8 +61,6 @@ func TestLoad(t *testing.T) {
 					t.Error(fmt.Errorf("Expected %v found %v for field %s", expectedSrvMap[j], testSrvMap[j], j))
 				}
 			}
-		} else if testMap[i] == nil || testMap[i] != expectedMap[i] {
-			t.Error(fmt.Errorf("Expected %v found %v for field %s", expectedMap[i], testMap[i], i))
 		}
 	}
 }

@@ -7,11 +7,11 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	driver, err := New(os.Getenv("DOCKER_HOST"), "v1.23", "0.1.1")
+	driver, err := New(os.Getenv("DOCKER_HOST"), "v1.23", "latest")
 	if err != nil {
 		t.Error(err)
 	}
-	err = driver.Run("test", "/etc/maestro/", fmt.Sprintf("%s/src/github.com/cpg1111/maestro", os.Getenv("GO_PATH")), []string{
+	err = driver.Run("test", "/etc/maestro/", fmt.Sprintf("%s/src/github.com/cpg1111/maestro", os.Getenv("GOPATH")), []string{
 		"maestro",
 		"--branch=master",
 		"--deploy=true",

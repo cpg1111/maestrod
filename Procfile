@@ -6,7 +6,3 @@ etcd2: ./etcd_up.sh fd17c9101d94703f6f4c3d8d6cfb72b62b894cd7
 
 etcd3: ./etcd_up.sh
 
-mongodb: docker run -d -p 27017:27017 -p 28017:28027 mongodb
-
-redis: docker run -d -p 6379:6379 redis
-
