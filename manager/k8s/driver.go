@@ -67,11 +67,25 @@ type podSpec struct {
 	RestartPolicy string      `json:"restartPolicy"`
 }
 
-type Pod struct {
-	Kind       string      `json:"kind"`
-	ApiVersion string      `json:"apiVersion"`
-	Metadata   podMetadata `json:"metadata"`
-	Spec       podSpec     `json:"spec"`
+func (d *Driver) createPod(newPod *Pod) error {
+	body, marshErr := json.Marshal(newPod)
+	if marshErr != nil {
+		return marshErr
+	}
+	bodyReader := bytes.NewReader(body)
+	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces/maestro/pods", d.Host), "application/json", bodyReader)
+	if postErr != nil {
+		return postErr
+	}
+	defer res.Body.Close()
+	resBody, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return readErr
+	}
+	if res.StatusCode != 201 {
+		return fmt.Errorf("did not create maestro worker, received a status of %v \n %s", res.StatusCode, (string)(resBody))
+	}
+	return nil
 }
 
 func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {

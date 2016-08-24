@@ -25,6 +25,14 @@ func TestRun(t *testing.T) {
 	prevCommit := os.Getenv("TEST_PREV_COMMIT")
 	currCommit := os.Getenv("TEST_CURR_COMMIT")
 	clonePath := "/tmp/test/"
+	nsErr := driver.CreateNamespace("maestro")
+	if nsErr != nil {
+		t.Error(nsErr)
+	}
+	saErr := driver.CreateSvcAccnt("default")
+	if saErr != nil {
+		t.Error(saErr)
+	}
 	runErr := driver.Run("test", confPath, confPath, []string{
 		"maestro",
 		fmt.Sprintf("--branch=%s", branch),
