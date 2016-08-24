@@ -3,8 +3,8 @@ package k8s
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/cpg1111/maestrod/config"
@@ -32,9 +32,33 @@ func New(host, maestroVersion string, conf *config.Server) *Driver {
 	}
 }
 
-type podMetadata struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
+func (d *Driver) CreateNamespace(namespace string) error {
+	newNamespace := &Namespace{
+		Kind:       "Namespace",
+		ApiVersion: "v1",
+		Metadata: nsMetadata{
+			Name:      namespace,
+			Namespace: namespace,
+		},
+	}
+	body, marshErr := json.Marshal(newNamespace)
+	if marshErr != nil {
+		return marshErr
+	}
+	bodyReader := bytes.NewReader(body)
+	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces", d.Host), "application/json", bodyReader)
+	if postErr != nil {
+		return postErr
+	}
+	defer res.Body.Close()
+	resBody, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return readErr
+	}
+	if res.StatusCode != 201 {
+		return fmt.Errorf("did not create maestro namespace, received %v \n %s", res.StatusCode, (string)(resBody))
+	}
+	return nil
 }
 
 type podSpec struct {
@@ -63,7 +87,7 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	sec := secCtx{}
 	maestroContainer := NewContainer(d.MaestroVersion, args, confContainerVol, sec)
 	newPod := &Pod{
-		Kind:       "pod",
+		Kind:       "Pod",
 		ApiVersion: "v1",
 		Metadata: podMetadata{
 			Name:      name,
@@ -74,17 +98,5 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 			Containers: []Container{*maestroContainer},
 		},
 	}
-	body, marshErr := json.Marshal(newPod)
-	if marshErr != nil {
-		return marshErr
-	}
-	bodyReader := bytes.NewReader(body)
-	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces/maestro/pods", d.Host), "application/json", bodyReader)
-	if postErr != nil {
-		return postErr
-	}
-	if res.StatusCode != 201 {
-		return errors.New("did not create maestro worker")
-	}
-	return nil
+	return d.createPod(newPod)
 }
