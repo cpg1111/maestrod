@@ -61,10 +61,33 @@ func (d *Driver) CreateNamespace(namespace string) error {
 	return nil
 }
 
-type podSpec struct {
-	Volumes       []Volume    `json:"volumes"`
-	Containers    []Container `json:"containers"`
-	RestartPolicy string      `json:"restartPolicy"`
+func (d *Driver) CreateSvcAccnt(name string) error {
+	newSvcAccnt := &ServiceAccount{
+		Kind:       "ServiceAccount",
+		ApiVersion: "v1",
+		Metadata: saMetadata{
+			Name:      name,
+			Namespace: "maestro",
+		},
+	}
+	body, marshErr := json.Marshal(newSvcAccnt)
+	if marshErr != nil {
+		return marshErr
+	}
+	bodyReader := bytes.NewReader(body)
+	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces/%s/serviceaccounts", d.Host, "maestro"), "application/json", bodyReader)
+	if postErr != nil {
+		return postErr
+	}
+	defer res.Body.Close()
+	resBody, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return readErr
+	}
+	if res.StatusCode != 201 {
+		return fmt.Errorf("did not create service account, received %s \n %s", res.StatusCode, (string)(resBody))
+	}
+	return nil
 }
 
 func (d *Driver) createPod(newPod *Pod) error {
