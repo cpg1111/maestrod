@@ -32,6 +32,23 @@ func New(host, maestroVersion string, conf *config.Server) *Driver {
 	}
 }
 
+func (d *Driver) create(url, errObj string, body []byte) error {
+	bodyReader := bytes.NewReader(body)
+	res, postErr := d.Client.Post(fmt.Sprintf("%s%s", d.Host, url), "application/json", bodyReader)
+	if postErr != nil {
+		return postErr
+	}
+	defer res.Body.Close()
+	resBody, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return readErr
+	}
+	if res.StatusCode != 201 {
+		return fmt.Errorf("did not create %s, received  %v \n %s", errObj, res.StatusCode, (string)(resBody))
+	}
+	return nil
+}
+
 func (d *Driver) CreateNamespace(namespace string) error {
 	newNamespace := &Namespace{
 		Kind:       "Namespace",
@@ -45,20 +62,7 @@ func (d *Driver) CreateNamespace(namespace string) error {
 	if marshErr != nil {
 		return marshErr
 	}
-	bodyReader := bytes.NewReader(body)
-	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces", d.Host), "application/json", bodyReader)
-	if postErr != nil {
-		return postErr
-	}
-	defer res.Body.Close()
-	resBody, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return readErr
-	}
-	if res.StatusCode != 201 {
-		return fmt.Errorf("did not create maestro namespace, received %v \n %s", res.StatusCode, (string)(resBody))
-	}
-	return nil
+	return d.create("/api/v1/namespaces", "namespace", body)
 }
 
 func (d *Driver) CreateSvcAccnt(name string) error {
@@ -74,20 +78,7 @@ func (d *Driver) CreateSvcAccnt(name string) error {
 	if marshErr != nil {
 		return marshErr
 	}
-	bodyReader := bytes.NewReader(body)
-	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces/%s/serviceaccounts", d.Host, "maestro"), "application/json", bodyReader)
-	if postErr != nil {
-		return postErr
-	}
-	defer res.Body.Close()
-	resBody, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return readErr
-	}
-	if res.StatusCode != 201 {
-		return fmt.Errorf("did not create service account, received %s \n %s", res.StatusCode, (string)(resBody))
-	}
-	return nil
+	return d.create("/api/namepsaces/maestro/serviceaccounts", "service account", body)
 }
 
 func (d *Driver) createPod(newPod *Pod) error {
@@ -95,20 +86,7 @@ func (d *Driver) createPod(newPod *Pod) error {
 	if marshErr != nil {
 		return marshErr
 	}
-	bodyReader := bytes.NewReader(body)
-	res, postErr := d.Client.Post(fmt.Sprintf("%s/api/v1/namespaces/maestro/pods", d.Host), "application/json", bodyReader)
-	if postErr != nil {
-		return postErr
-	}
-	defer res.Body.Close()
-	resBody, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return readErr
-	}
-	if res.StatusCode != 201 {
-		return fmt.Errorf("did not create maestro worker, received a status of %v \n %s", res.StatusCode, (string)(resBody))
-	}
-	return nil
+	return d.create("/api/v1/namespaces/maestro/pods", "maestro worker", body)
 }
 
 func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
