@@ -12,78 +12,77 @@ import (
 )
 
 type downwardAPIObj struct {
-	Path     string `json:"path"`
+	Path     string `json:"path,omitempty"`
 	FieldRef struct {
-		Name string `json:"name"`
-	} `json:"fieldRef"`
+		Name string `json:"name,omitempty"`
+	} `json:"fieldRef,omitempty"`
 }
 
 type keyPath struct {
-	Key  string `json:"key"`
-	Path string `json:"path"`
+	Key  string `json:"key,omitempty"`
+	Path string `json:"path,omitempty"`
 }
 
 type hostPath struct {
-	Path string `json:"path"`
+	Path string `json:"path,omitempty"`
 }
 
 type emptyDir struct {
-	Medium string `json:"medium"`
+	Medium string `json:"medium,omitempty"`
 }
 
 type gcePersistentDisk struct {
-	PDName    string `json:"pdName"`
-	FSType    string `json:"fsType"`
-	Partition int    `json:"partition"`
-	ReadOnly  bool   `json:"readOnly"`
+	PDName    string `json:"pdName,omitempty"`
+	FSType    string `json:"fsType,omitempty"`
+	Partition int    `json:"partition,omitempty"`
+	ReadOnly  bool   `json:"readOnly,omitempty"`
 }
 
 type awsElasticBlockStore struct {
-	VolumeID  string `json:"volumeID"`
-	FSType    string `json:"fsType"`
-	Partition int    `json:"partition"`
-	ReadOnly  bool   `json:"readOnly"`
+	VolumeID  string `json:"volumeID,omitempty"`
+	FSType    string `json:"fsType,omitempty"`
+	Partition int    `json:"partition,omitempty"`
+	ReadOnly  bool   `json:"readOnly,omitempty"`
 }
 
 type nfs struct {
-	Server   string `json:"server"`
-	Path     string `json:"path"`
-	ReadOnly bool   `json:"readOnly"`
+	Server   string `json:"server,omitempty"`
+	Path     string `json:"path,omitempty"`
+	ReadOnly bool   `json:"readOnly,omitempty"`
 }
 
 type gluster struct {
-	Endpoints string `json:"endpoints"`
-	Path      string `json:"path"`
-	ReadOnly  bool   `json:"readOnly"`
+	Endpoints string `json:"endpoints,omitempty"`
+	Path      string `json:"path,omitempty"`
+	ReadOnly  bool   `json:"readOnly,omitempty"`
 }
 
 type claim struct {
-	ClaimName string `json:"claimName"`
-	ReadOnly  bool   `json:"readOnly"`
+	ClaimName string `json:"claimName,omitempty"`
+	ReadOnly  bool   `json:"readOnly,omitempty"`
 }
 
 type cinder struct {
-	VolumeID string `json:"volumeID"`
-	FSType   string `json:"fsType"`
-	ReadOnly bool   `json:"readOnly"`
+	VolumeID string `json:"volumeID,omitempty"`
+	FSType   string `json:"fsType,omitempty"`
+	ReadOnly bool   `json:"readOnly,omitempty"`
 }
 
 type flocker struct {
-	DatasetName string `json:"datasetName"`
+	DatasetName string `json:"datasetName,omitempty"`
 }
 
 type Volume struct {
-	Name                  string               `json:"-"`
-	Type                  string               `json:"-"`
-	HostPath              hostPath             `json:"hostPath,omitempty"`
-	EmptyDir              emptyDir             `json:"emptDir,omitempty"`
-	GCEPersistentDisk     gcePersistentDisk    `json:"gcePersistentDisk,omitempty"`
-	AWSElasticBlockStore  awsElasticBlockStore `json:"awsElasticBlockStore,omitempty"`
-	NFS                   nfs                  `json:"nfs,omitempty"`
-	GlusterFS             gluster              `json:"glusterfs,omitempty"`
-	PersistentVolumeClaim claim                `json:"persistentVolumeClaim,omitempty"`
-	Cinder                cinder               `json:"cinder,omitempty"`
-	Flocker               flocker              `json:"flocker,omitempty"`
+	Name                  string                `json:"-"`
+	Type                  string                `json:"-"`
+	HostPath              *hostPath             `json:"hostPath,omitempty"`
+	GCEPersistentDisk     *gcePersistentDisk    `json:"gcePersistentDisk,omitempty"`
+	AWSElasticBlockStore  *awsElasticBlockStore `json:"awsElasticBlockStore,omitempty"`
+	NFS                   *nfs                  `json:"nfs,omitempty"`
+	GlusterFS             *gluster              `json:"glusterfs,omitempty"`
+	PersistentVolumeClaim *claim                `json:"persistentVolumeClaim,omitempty"`
+	Cinder                *cinder               `json:"cinder,omitempty"`
+	Flocker               *flocker              `json:"flocker,omitempty"`
 }
 
 func (v *Volume) DelegateType(confTarget, confTargetPrefix string, volumeConf *config.Mount) {
@@ -93,47 +92,44 @@ func (v *Volume) DelegateType(confTarget, confTargetPrefix string, volumeConf *c
 	v.Type = confTargetPrefix
 	switch confTargetPrefix {
 	case "hostPath":
-		v.HostPath = hostPath{Path: confTarget}
-		break
-	case "emptyDir":
-		v.EmptyDir = emptyDir{}
+		v.HostPath = &hostPath{Path: confTarget}
 		break
 	case "gcePersistentDisk":
-		v.GCEPersistentDisk = gcePersistentDisk{
+		v.GCEPersistentDisk = &gcePersistentDisk{
 			PDName:   volumeConf.ID,
 			FSType:   volumeConf.FSType,
 			ReadOnly: volumeConf.ReadOnly,
 		}
 		break
 	case "awsElasticBlockStore":
-		v.AWSElasticBlockStore = awsElasticBlockStore{
+		v.AWSElasticBlockStore = &awsElasticBlockStore{
 			VolumeID: volumeConf.ID,
 			FSType:   volumeConf.FSType,
 			ReadOnly: volumeConf.ReadOnly,
 		}
 		break
 	case "nfs":
-		v.NFS = nfs{
+		v.NFS = &nfs{
 			Server:   volumeConf.Server,
 			Path:     volumeConf.Path,
 			ReadOnly: volumeConf.ReadOnly,
 		}
 		break
 	case "glusterfs":
-		v.GlusterFS = gluster{
+		v.GlusterFS = &gluster{
 			Endpoints: volumeConf.Endpoints,
 			Path:      volumeConf.Path,
 			ReadOnly:  volumeConf.ReadOnly,
 		}
 		break
 	case "persistentVolumeClaim":
-		v.PersistentVolumeClaim = claim{
+		v.PersistentVolumeClaim = &claim{
 			ClaimName: volumeConf.Path,
 			ReadOnly:  volumeConf.ReadOnly,
 		}
 		break
 	case "flocker":
-		v.Flocker = flocker{
+		v.Flocker = &flocker{
 			DatasetName: volumeConf.Name,
 		}
 		break
@@ -197,12 +193,14 @@ func getVolume(name, confTarget string) Volume {
 	}
 	if !strings.Contains(confTarget, "://") {
 		vol.Type = "hostPath"
-		vol.HostPath = hostPath{Path: confTarget}
+		vol.HostPath = &hostPath{Path: confTarget}
 		return vol
 	}
 	sepIndex := strings.Index(confTarget, "://")
 	prefix := confTarget[0:sepIndex]
-	vol.DelegateType(confTarget, prefix, nil)
+	if len(vol.Type) == 0 {
+		vol.DelegateType(confTarget, prefix, nil)
+	}
 	return vol
 }
 

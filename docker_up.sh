@@ -23,4 +23,4 @@ fi
 
 docker rm -f $(docker ps -a -q)
 docker run --rm -p 27017:27017 -p 28017:28027 mongo &
-docker run --rm -p 6379:6379 redis
+docker run --rm -p 6379:6379 redis &
