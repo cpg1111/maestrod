@@ -49,7 +49,23 @@ func (d *Driver) create(url, errObj string, body []byte) error {
 	return nil
 }
 
+func (d *Driver) check(url string) (bool, error) {
+	res, getErr := d.Client.Get(fmt.Sprintf("%s%s", d.Host, url))
+	if res.StatusCode == 404 {
+		return false, nil
+	} else if res.StatusCode == 200 {
+		return true, nil
+	}
+	return false, getErr
+}
+
 func (d *Driver) CreateNamespace(namespace string) error {
+	exists, checkErr := d.check(fmt.Sprintf("/api/v1/namespaces/%s", namespace))
+	if checkErr != nil {
+		return checkErr
+	} else if exists {
+		return nil
+	}
 	newNamespace := &Namespace{
 		Kind:       "Namespace",
 		ApiVersion: "v1",
@@ -66,6 +82,12 @@ func (d *Driver) CreateNamespace(namespace string) error {
 }
 
 func (d *Driver) CreateSvcAccnt(name string) error {
+	exists, checkErr := d.check(fmt.Sprintf("/api/v1/namespaces/maestro/serviceaccounts/%s", name))
+	if checkErr != nil {
+		return checkErr
+	} else if exists {
+		return nil
+	}
 	newSvcAccnt := &ServiceAccount{
 		Kind:       "ServiceAccount",
 		ApiVersion: "v1",
