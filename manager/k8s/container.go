@@ -19,21 +19,21 @@ type envVar struct {
 		FieldRef struct {
 			APIVersion string `json:"apiVersion"`
 			FieldPath  string `json:"fieldPath"`
-		} `json:"fieldRef"`
+		} `json:"fieldRef,omitempty"`
 		ConfigMapKeyRef struct {
 			Name string `json:"name"`
 			Key  string `json:"key"`
-		} `json:"configMapKeyRef"`
+		} `json:"configMapKeyRef,omitempty"`
 		SecretKeyRef struct {
 			Name string `json:"name"`
 			Key  string `json:"key"`
-		} `json:"secretKeyRef"`
+		} `json:"secretKeyRef,omitempty"`
 	} `json:"valueFrom,omitempty"`
 }
 
 type volumeMount struct {
 	Name      string `json:"name"`
-	ReadOnly  bool   `json:"readOnly"`
+	ReadOnly  bool   `json:"readOnly,omitempty"`
 	MountPath string `json:"mountPath"`
 }
 
@@ -41,13 +41,13 @@ type secCtx struct {
 	Capabilities struct {
 		Add  []string `json:"add"`
 		Drop []string `json:"drop"`
-	} `json:"capabilities"`
+	} `json:"capabilities,omitempty"`
 	SELinuxOptions struct {
 		User  string `json:"user"`
 		Role  string `json:"role"`
 		Type  string `json:"type"`
 		Level string `json:"level"`
-	} `json:"seLinuxOptions"`
+	} `json:"seLinuxOptions,omitempty"`
 	RunAsUser              int  `json:"runAsUser"`
 	RunAsNonRoot           bool `json:"runAsNonRoot"`
 	ReadOnlyRootFileSystem bool `json:"readOnlyRootFileSystem"`
@@ -56,18 +56,18 @@ type secCtx struct {
 type Container struct {
 	Name            string        `json:"name"`
 	Image           string        `json:"image"`
-	Command         []string      `json:"command"`
-	Args            []string      `json:"args"`
-	WorkingDir      string        `json:"workingDir"`
-	Ports           []port        `json:"ports"`
-	Env             []envVar      `json:"env"`
-	VolumeMounts    []volumeMount `json:"volumeMounts"`
-	SecurityContext secCtx        `json:"securityContext"`
+	Command         []string      `json:"command,omitempty"`
+	Args            []string      `json:"args,omitempty"`
+	WorkingDir      string        `json:"workingDir,omitempty"`
+	Ports           []port        `json:"ports,omitempty"`
+	Env             []envVar      `json:"env,omitempty"`
+	VolumeMounts    []volumeMount `json:"volumeMounts,omitempty"`
+	SecurityContext *secCtx       `json:"securityContext,omitempty"`
 }
 
-func NewContainer(maestroVersion string, cmd []string, vol volumeMount, sec secCtx) *Container {
+func NewContainer(maestroVersion string, cmd []string, vol volumeMount, sec *secCtx) *Container {
 	return &Container{
-		Name:            fmt.Sprintf("maestro:%s", maestroVersion),
+		Name:            fmt.Sprintf("maestro-%s", maestroVersion),
 		Image:           fmt.Sprintf("cpg1111/maestro:%s", maestroVersion),
 		Command:         cmd,
 		VolumeMounts:    []volumeMount{vol},

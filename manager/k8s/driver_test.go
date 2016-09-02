@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"testing"
 
@@ -26,20 +25,28 @@ func TestRun(t *testing.T) {
 	prevCommit := os.Getenv("TEST_PREV_COMMIT")
 	currCommit := os.Getenv("TEST_CURR_COMMIT")
 	clonePath := "/tmp/test/"
+	nsErr := driver.CreateNamespace("maestro")
+	if nsErr != nil {
+		t.Error(nsErr)
+	}
+	saErr := driver.CreateSvcAccnt("default")
+	if saErr != nil {
+		t.Error(saErr)
+	}
 	runErr := driver.Run("test", confPath, confPath, []string{
 		"maestro",
 		fmt.Sprintf("--branch=%s", branch),
 		fmt.Sprintf("--deploy=%v", false),
 		fmt.Sprintf("--prev-commit=%s", prevCommit),
 		fmt.Sprintf("--curr-commit=%s", currCommit),
-		fmt.Sprintf("--config=%s", confPath),
+		fmt.Sprintf("--config=%s", "/etc/maestro/maestrod.toml"),
 		fmt.Sprintf("--clone-path=%s", clonePath),
 	})
 	if runErr != nil {
 		t.Error(runErr)
 	}
 	podURL := fmt.Sprintf("%s/namespaces/maestro/pods/test", K8S)
-	resp, getErr := http.Get(podURL)
+	resp, getErr := driver.Client.Get(podURL)
 	if getErr != nil {
 		t.Error(getErr)
 	}
