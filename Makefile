@@ -15,9 +15,9 @@ test:
 	go test ./lifecycle/...
 	# go test ./manager/docker/...
 	TEST_K8S_URL=https://`dev_deps/minikube ip`:8443 \
-	TEST_MAESTRO_VERSION=latest \
+	TEST_MAESTRO_VER=latest \
 	TEST_BRANCH=master \
-	TEST_CONF=./example.conf.toml \
+	TEST_CONF_PATH=./example.conf.toml \
 	TEST_PREV_COMMIT=f5c1e92536b56b09b7cca764a066a1fc3f19cc8d \
 	TEST_CURR_COMMIT=02eeac380bae358c6c4f19e720d42e6822cb4903 \
 	TEST_CLIENT_CERT=~/.minikube/apiserver.crt \

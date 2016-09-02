@@ -112,7 +112,7 @@ func (d *Driver) createPod(newPod *Pod) error {
 }
 
 func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
-	confVol, volErr := NewVolume(fmt.Sprintf("%s_conf", name), hostVolume, d)
+	confVol, volErr := NewVolume(fmt.Sprintf("%s-conf", name), hostVolume, d)
 	if volErr != nil {
 		return volErr
 	}
@@ -121,7 +121,7 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 		ReadOnly:  false,
 		MountPath: confTarget,
 	}
-	sec := secCtx{}
+	sec := &secCtx{}
 	maestroContainer := NewContainer(d.MaestroVersion, args, confContainerVol, sec)
 	newPod := &Pod{
 		Kind:       "Pod",

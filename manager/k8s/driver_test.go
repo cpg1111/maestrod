@@ -39,7 +39,7 @@ func TestRun(t *testing.T) {
 		fmt.Sprintf("--deploy=%v", false),
 		fmt.Sprintf("--prev-commit=%s", prevCommit),
 		fmt.Sprintf("--curr-commit=%s", currCommit),
-		fmt.Sprintf("--config=%s", confPath),
+		fmt.Sprintf("--config=%s", "/etc/maestro/maestrod.toml"),
 		fmt.Sprintf("--clone-path=%s", clonePath),
 	})
 	if runErr != nil {

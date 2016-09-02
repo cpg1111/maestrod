@@ -1,0 +1,27 @@
+[Environment]
+Env=[]
+ExecSync=[]
+Exec=[]
+
+[Project]
+RepoURL="git@github.com:cpg1111/maestrod.git"
+CloneCMD="git clone"
+AuthType="SSH"
+SSHPrivKeyPath="~/.ssh/id-rsa"
+SSHPubKeyPath="~/.ssh/id-rsa.pub"
+Username="git"
+Password=""
+PromptForPWD=false
+
+[[Services]]
+Name="maestrod"
+Tag="0.1.0"
+TagType="git"
+Path="./"
+BuildLogFilePath="/var/log/maestro/maestrod.log"
+BuildCMD=["make"]
+TestCMD=["make test"]
+CheckCMD=[""]
+CreateCMD=[""]
+UpdateCMD=[""]
+DependsOn=[]

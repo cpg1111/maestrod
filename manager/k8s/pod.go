@@ -8,7 +8,7 @@ type podMetadata struct {
 type podSpec struct {
 	Volumes       []Volume    `json:"volumes"`
 	Containers    []Container `json:"containers"`
-	RestartPolicy string      `json:"restartPolicy"`
+	RestartPolicy string      `json:"restartPolicy,omitempty"`
 }
 
 type Pod struct {

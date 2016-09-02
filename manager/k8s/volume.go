@@ -24,7 +24,7 @@ type keyPath struct {
 }
 
 type hostPath struct {
-	Path string `json:"path,omitempty"`
+	Path string `json:"path"`
 }
 
 type emptyDir struct {
@@ -73,7 +73,7 @@ type flocker struct {
 }
 
 type Volume struct {
-	Name                  string                `json:"-"`
+	Name                  string                `json:"name"`
 	Type                  string                `json:"-"`
 	HostPath              *hostPath             `json:"hostPath,omitempty"`
 	GCEPersistentDisk     *gcePersistentDisk    `json:"gcePersistentDisk,omitempty"`
@@ -189,7 +189,7 @@ func createVolume(driver *Driver, vol *Volume) error {
 
 func getVolume(name, confTarget string) Volume {
 	vol := Volume{
-		Name: fmt.Sprintf("%s_config", name),
+		Name: name,
 	}
 	if !strings.Contains(confTarget, "://") {
 		vol.Type = "hostPath"
