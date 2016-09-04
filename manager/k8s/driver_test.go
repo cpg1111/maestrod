@@ -33,7 +33,11 @@ func TestRun(t *testing.T) {
 	if saErr != nil {
 		t.Error(saErr)
 	}
-	runErr := driver.Run("test", confPath, confPath, []string{
+	wd, wdErr := os.Getwd()
+	if wdErr != nil {
+		t.Error(wdErr)
+	}
+	runErr := driver.Run("test", confPath, wd, []string{
 		"maestro",
 		fmt.Sprintf("--branch=%s", branch),
 		fmt.Sprintf("--deploy=%v", false),
