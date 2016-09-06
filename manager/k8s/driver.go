@@ -116,13 +116,9 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	if volErr != nil {
 		return volErr
 	}
-	confContainerVol := volumeMount{
-		Name:      confVol.Name,
-		ReadOnly:  false,
-		MountPath: confTarget,
-	}
 	sec := &secCtx{}
-	maestroContainer := NewContainer(d.MaestroVersion, args, confContainerVol, sec)
+	confContainerVol := newMount(confVol.Name)
+	maestroContainer := NewContainer(d.MaestroVersion, args, *confContainerVol, sec)
 	newPod := &Pod{
 		Kind:       "Pod",
 		ApiVersion: "v1",
@@ -131,8 +127,9 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 			Namespace: "maestro",
 		},
 		Spec: podSpec{
-			Volumes:    []Volume{*confVol},
-			Containers: []Container{*maestroContainer},
+			Volumes:       []Volume{*confVol},
+			Containers:    []Container{*maestroContainer},
+			RestartPolicy: "Never",
 		},
 	}
 	return d.createPod(newPod)

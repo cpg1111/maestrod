@@ -31,12 +31,6 @@ type envVar struct {
 	} `json:"valueFrom,omitempty"`
 }
 
-type volumeMount struct {
-	Name      string `json:"name"`
-	ReadOnly  bool   `json:"readOnly,omitempty"`
-	MountPath string `json:"mountPath"`
-}
-
 type secCtx struct {
 	Capabilities struct {
 		Add  []string `json:"add"`
@@ -51,6 +45,20 @@ type secCtx struct {
 	RunAsUser              int  `json:"runAsUser"`
 	RunAsNonRoot           bool `json:"runAsNonRoot"`
 	ReadOnlyRootFileSystem bool `json:"readOnlyRootFileSystem"`
+}
+
+type volumeMount struct {
+	Name      string `json:"name"`
+	ReadOnly  bool   `json:"readOnly,omitempty"`
+	MountPath string `json:"mountPath"`
+}
+
+func newMount(name string) *volumeMount {
+	return &volumeMount{
+		Name:      name,
+		ReadOnly:  false,
+		MountPath: "/etc/maestro/",
+	}
 }
 
 type Container struct {
