@@ -1,6 +1,8 @@
 package statecom
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -8,12 +10,13 @@ import (
 )
 
 type Handler struct {
+	http.Handler
 	Store *datastore.Datastore
 }
 
-func NewHandler(queue *lifecycle.Queue) *Handler {
+func NewHandler(store *datastore.Datastore) *Handler {
 	return &Handler{
-		Queue: queue,
+		Store: store,
 	}
 }
 
@@ -26,10 +29,10 @@ func (h Handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		h.Post(res, req)
 		break
 	case "PUT":
-		h.Put(res, req)
+		h.HandleUnsupported(res, req)
 		break
 	case "DELETE":
-		h.Delete(res, req)
+		h.HandleUnsupported(res, req)
 		break
 	}
 }
@@ -91,4 +94,55 @@ func (h *Handler) getOne(res http.ResponseWriter, req *http.Request, query url.V
 			return
 		}
 	}
+}
+
+func projectStateKey(body map[string]interface{}) string {
+	return fmt.Sprintf("/states/%s/%s/overall/%s", body["Project"], body["Branch"], body["TimeStamp"])
+}
+
+func serviceStateKey(body map[string]interface{}) string {
+	return fmt.Sprintf("states/%s/%s/%s/%s", body["State"]["Project"], body["State"]["Branch"], body["Name"], body["State"]["TimeStamp"])
+}
+
+func (h *Handler) Create(res http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	var body []byte
+	_, readErr := req.Body.Read(body)
+	if readErr != nil {
+		res.WriteHeader(400)
+		res.Write("400 Bad Request")
+		log.Println(readErr.Error())
+		return
+	}
+	var bodyMap map[string]interface{}
+	marshErr := json.Unmarhsal(body, bodyMap)
+	if marshErr != nil {
+		res.WriteHeader(400)
+		res.Write("400 Bad Request")
+		log.Println(marshErr.Error())
+	}
+	var key string
+	if bodyMap["Name"] != nil {
+		key = serviceStateKey(bodyMap)
+	} else {
+		key = projectStateKey(bodyMap)
+	}
+	errChan := make(chan error)
+	h.Store.Save(key, bodyMap, func(err error) {
+		errChan <- err
+	})
+	saveErr := <-errChan
+	if saveErr != nil {
+		res.WriteHeader(500)
+		res.Write("500 Internal Error")
+		return
+	}
+	res.WriteHeader(201)
+	res.Write("201 Created")
+}
+
+func (h *Handler) HandlerUnsupported(res http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	res.WriteHeader(405)
+	res.Write("405 Method Not Allowed")
 }
