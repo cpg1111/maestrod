@@ -11,17 +11,18 @@ import (
 	"github.com/cpg1111/maestrod/datastore/etcd"
 	"github.com/cpg1111/maestrod/datastore/mongodb"
 	"github.com/cpg1111/maestrod/datastore/redis"
+	"github.com/cpg1111/maestrod/gitactivity"
 	"github.com/cpg1111/maestrod/lifecycle"
 	"github.com/cpg1111/maestrod/manager"
 	"github.com/cpg1111/maestrod/manager/docker"
-	"github.com/cpg1111/maestrod/server"
+	"github.com/cpg1111/maestrod/statecom"
 )
 
 var (
 	configPath    = flag.String("config-path", "/etc/maestrod/conf.toml", "path to the config file to load, defaults to /etc/maestrod/conf.toml")
 	runtime       = flag.String("runtime", "", "type of runtime, defaults to native or the value specifcied in the configuration file, other options are: docker, kubernetes, rkt, EC2, GCE, DO, libvirt")
-	hostIP        = flag.String("host-ip", "", "host ip for the server to bind to, defaults to 127.0.0.1 or the value specifcied in the configuration file")
-	port          = flag.Uint("port", 0, "port number for the server to listen on, defaults to 8484 or the value specifcied in the configuration file")
+	hostIP        = flag.String("host-ip", "", "host ip for the gitactivity to bind to, defaults to 127.0.0.1 or the value specifcied in the configuration file")
+	port          = flag.Uint("port", 0, "port number for the gitactivity to listen on, defaults to 8484 or the value specifcied in the configuration file")
 	workspaceDir  = flag.String("workspace-dir", "", "working directory for maestro cloning and building, defaults to /tmp/maestro")
 	datastoreType = flag.String("datastore-type", "redis", "type of data store to persist configuration in, defaults to redis")
 )
@@ -89,7 +90,8 @@ func main() {
 	conf := getConf()
 	store := getDataStore(conf)
 	queue := lifecycle.NewQueue(store)
-	server.Run(&conf.Server, store, queue)
+	gitactivity.Run(&conf.Server, store, queue)
+	statecom.Run(conf.Server.Host, conf.Server.ServerCertPath, conf.Server.ServerKeyPath, (int)(conf.Server.StateComPort), store)
 	running := &lifecycle.Running{}
 	managerDriver := getManager(conf)
 	var err error
