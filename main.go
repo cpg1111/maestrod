@@ -15,6 +15,7 @@ import (
 	"github.com/cpg1111/maestrod/lifecycle"
 	"github.com/cpg1111/maestrod/manager"
 	"github.com/cpg1111/maestrod/manager/docker"
+	"github.com/cpg1111/maestrod/statecom"
 )
 
 var (
@@ -90,6 +91,7 @@ func main() {
 	store := getDataStore(conf)
 	queue := lifecycle.NewQueue(store)
 	gitactivity.Run(&conf.Server, store, queue)
+	statecom.Run(conf.Server.Host, conf.Server.ServerCertPath, conf.Server.ServerKeyPath, (int)(conf.Server.StateComPort), store)
 	running := &lifecycle.Running{}
 	managerDriver := getManager(conf)
 	var err error

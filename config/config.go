@@ -38,6 +38,7 @@ type Server struct {
 	Host                string
 	SecurePort          uint
 	InsecurePort        uint
+	StateComPort        uint
 	WorkspaceDir        string
 }
 

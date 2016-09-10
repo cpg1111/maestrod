@@ -9,25 +9,27 @@ import (
 )
 
 func Run(host, cert, key string, port int, store *datastore.Datastore) {
-	handler := NewHandler(store)
-	mux := http.NewServeMux()
-	mux.Handler("/state", handler)
-	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", host, port),
-		Handler: mux,
-	}
-	if len(cert) > 0 && len(key) > 0 {
-		certificate := cert.GetKeyPair(cert, key)
-		rootCA := cert.GetRootCA()
-		tlsConf := &tls.Config{
-			Certificates: []tls.Certificate{certificate},
+	go func() {
+		handler := NewHandler(store)
+		mux := http.NewServeMux()
+		mux.Handler("/state", handler)
+		server := &http.Server{
+			Addr:    fmt.Sprintf("%s:%d", host, port),
+			Handler: mux,
 		}
-		if rootCA != nil {
-			tlsConf.RootCAs = rootCA
+		if len(cert) > 0 && len(key) > 0 {
+			certificate := cert.GetKeyPair(cert, key)
+			rootCA := cert.GetRootCA()
+			tlsConf := &tls.Config{
+				Certificates: []tls.Certificate{certificate},
+			}
+			if rootCA != nil {
+				tlsConf.RootCAs = rootCA
+			}
+			server.TLSConfig = tlsConf
+			server.ListenAndServeTLS()
+		} else {
+			server.ListenAndServe()
 		}
-		server.TLSConfig = tlsConf
-		server.ListenAndServeTLS()
-	} else {
-		server.ListenAndServe()
-	}
+	}()
 }
