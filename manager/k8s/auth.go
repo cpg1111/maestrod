@@ -2,10 +2,7 @@ package k8s
 
 import (
 	"crypto/tls"
-	"crypto/x509"
-	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/cpg1111/maestrod/cert"
 	"github.com/cpg1111/maestrod/config"
@@ -22,11 +19,11 @@ func loadCerts(conf *config.Server) (*tls.Config, error) {
 	}
 	if certPool != nil {
 		return &tls.Config{
-			Certificates: []tls.Certificate{certificate},
+			Certificates: []tls.Certificate{*certificate},
 			RootCAs:      certPool,
 		}, nil
 	}
-	return &tls.Config{Certificates: []tls.Certificate{certificate}}, nil
+	return &tls.Config{Certificates: []tls.Certificate{*certificate}}, nil
 }
 
 func NewAuthTransport(conf *config.Server) (*http.Transport, error) {

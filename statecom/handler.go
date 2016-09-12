@@ -1,6 +1,7 @@
 package statecom
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,12 +12,12 @@ import (
 
 type Handler struct {
 	http.Handler
-	Store *datastore.Datastore
+	Store datastore.Datastore
 }
 
 func NewHandler(store *datastore.Datastore) *Handler {
 	return &Handler{
-		Store: store,
+		Store: *store,
 	}
 }
 
@@ -26,7 +27,7 @@ func (h Handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		h.Get(res, req)
 		break
 	case "POST":
-		h.Post(res, req)
+		h.Create(res, req)
 		break
 	case "PUT":
 		h.HandleUnsupported(res, req)
@@ -47,10 +48,10 @@ func (h *Handler) Get(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handler) getAll(res http.ResponseWriter, req *http.Request) {
+func (h Handler) getAll(res http.ResponseWriter, req *http.Request) {
 	resChan := make(chan []byte)
 	errChan := make(chan error)
-	h.Store.Find("/configs", func(val []byte, err error) {
+	h.Store.Find("/state", func(val []byte, err error) {
 		if err != nil {
 			errChan <- err
 			return
@@ -62,19 +63,20 @@ func (h *Handler) getAll(res http.ResponseWriter, req *http.Request) {
 		case dataErr := <-errChan:
 			res.WriteHeader(500)
 			res.Write([]byte("500 Internal Error"))
+			log.Println("WARNING:", dataErr.Error())
 			return
 		case dataRes := <-resChan:
 			res.WriteHeader(200)
-			res.Write(val)
+			res.Write(dataRes)
 			return
 		}
 	}
 }
 
-func (h *Handler) getOne(res http.ResponseWriter, req *http.Request, query url.Values, project string) {
+func (h Handler) getOne(res http.ResponseWriter, req *http.Request, query url.Values, project string) {
 	resChan := make(chan []byte)
 	errChan := make(chan error)
-	key := fmt.Sprintf("/configs/%s", project)
+	key := fmt.Sprintf("/state/%s", project)
 	h.Store.Find(key, func(val []byte, err error) {
 		if err != nil {
 			errChan <- err
@@ -87,10 +89,11 @@ func (h *Handler) getOne(res http.ResponseWriter, req *http.Request, query url.V
 		case dataErr := <-errChan:
 			res.WriteHeader(500)
 			res.Write([]byte("500 Internal Error"))
+			log.Println("WARNING:", dataErr.Error())
 			return
 		case dataRes := <-resChan:
 			res.WriteHeader(200)
-			res.Write(val)
+			res.Write(dataRes)
 			return
 		}
 	}
@@ -101,24 +104,25 @@ func projectStateKey(body map[string]interface{}) string {
 }
 
 func serviceStateKey(body map[string]interface{}) string {
-	return fmt.Sprintf("states/%s/%s/%s/%s", body["State"]["Project"], body["State"]["Branch"], body["Name"], body["State"]["TimeStamp"])
+	state := body["State"].(map[string]interface{})
+	return fmt.Sprintf("states/%s/%s/%s/%s", state["Project"], state["Branch"], body["Name"], state["TimeStamp"])
 }
 
-func (h *Handler) Create(res http.ResponseWriter, req *http.Request) {
+func (h Handler) Create(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	var body []byte
 	_, readErr := req.Body.Read(body)
 	if readErr != nil {
 		res.WriteHeader(400)
-		res.Write("400 Bad Request")
+		res.Write([]byte("400 Bad Request"))
 		log.Println(readErr.Error())
 		return
 	}
 	var bodyMap map[string]interface{}
-	marshErr := json.Unmarhsal(body, bodyMap)
+	marshErr := json.Unmarshal(body, bodyMap)
 	if marshErr != nil {
 		res.WriteHeader(400)
-		res.Write("400 Bad Request")
+		res.Write([]byte("400 Bad Request"))
 		log.Println(marshErr.Error())
 	}
 	var key string
@@ -134,15 +138,15 @@ func (h *Handler) Create(res http.ResponseWriter, req *http.Request) {
 	saveErr := <-errChan
 	if saveErr != nil {
 		res.WriteHeader(500)
-		res.Write("500 Internal Error")
+		res.Write([]byte("500 Internal Error"))
 		return
 	}
 	res.WriteHeader(201)
-	res.Write("201 Created")
+	res.Write([]byte("201 Created"))
 }
 
-func (h *Handler) HandlerUnsupported(res http.ResponseWriter, req *http.Request) {
+func (h Handler) HandleUnsupported(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	res.WriteHeader(405)
-	res.Write("405 Method Not Allowed")
+	res.Write([]byte("405 Method Not Allowed"))
 }

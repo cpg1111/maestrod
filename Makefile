@@ -4,7 +4,6 @@ get-deps:
 	go get github.com/kardianos/govendor
 build:
 	govendor sync
-	go build -o maestrod-container container/main.go
 	go build -o maestrod main.go
 test:
 	ETCD2_SERVICE_HOST=127.0.0.1 ETCD2_SERVICE_PORT=22379 go test ./datastore/etcd/v2/...
