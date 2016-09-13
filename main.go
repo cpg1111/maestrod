@@ -77,7 +77,7 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 	case "etcd3":
 		store, storeErr = etcd3.NewV3(datastoreHost, datastorePort)
 	case "mongodb":
-		store, storeErr = mongodb.New(datastoreHost, datastorePort, conf.Server.DataStorePWD)
+		store, storeErr = mongodb.New(datastoreHost, datastorePort, conf.Server.DataStoreUser, conf.Server.DataStorePWD)
 	default:
 		log.Fatal("specifcied datastore currently not supported, please create an issue @ https://github.com/cpg1111/maestrod")
 	}
