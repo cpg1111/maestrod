@@ -1,4 +1,4 @@
-package server
+package gitactivity
 
 import (
 	"encoding/json"
