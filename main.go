@@ -22,7 +22,7 @@ import (
 
 var (
 	configPath    = flag.String("config-path", "/etc/maestrod/conf.toml", "path to the config file to load, defaults to /etc/maestrod/conf.toml")
-	runtime       = flag.String("runtime", "", "type of runtime, defaults to native or the value specifcied in the configuration file, other options are: docker, kubernetes, rkt, EC2, GCE, DO, libvirt")
+	runtime       = flag.String("runtime", "k8s", "type of runtime, defaults to k8s or the value specifcied in the configuration file, other options are: docker, spawnd, rkt, EC2, libvirt")
 	hostIP        = flag.String("host-ip", "", "host ip for the gitactivity to bind to, defaults to 127.0.0.1 or the value specifcied in the configuration file")
 	port          = flag.Uint("port", 0, "port number for the gitactivity to listen on, defaults to 8484 or the value specifcied in the configuration file")
 	workspaceDir  = flag.String("workspace-dir", "", "working directory for maestro cloning and building, defaults to /tmp/maestro")
