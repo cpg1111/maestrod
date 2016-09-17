@@ -26,6 +26,9 @@ test:
 install:
 	mkdir -p /opt/bin/maestrod
 	mkdir -p /etc/maestrod/
-	cp maestrod-container /opt/bin/maestrod/maestrod-container
 	cp maestrod /opt/bin/maestrod/maestrod
 	cp example.conf.toml /etc/maestrod/conf.toml
+docker:
+	docker build -t maestrod-build -f Dockerfile_build .
+	docker run -v `pwd`/dist/:/opt/bin/maestrod/ maestrod-build
+	docker build -t maestrod .
