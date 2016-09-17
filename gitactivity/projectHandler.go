@@ -1,4 +1,4 @@
-package server
+package gitactivity
 
 import (
 	"encoding/json"
@@ -17,13 +17,13 @@ func (p ProjectSubHandler) Get(res http.ResponseWriter, req *http.Request) {
 	queries := req.URL.Query()
 	doneChan := make(chan bool)
 	if len(queries["name"]) > 0 {
-		store.Find(queries["name"][0], func(dbRes interface{}, err error) {
+		store.Find(queries["name"][0], func(dbRes []byte, err error) {
 			if err != nil {
 				p.Error.handle500(res, req, err)
 				doneChan <- true
 			} else {
 				res.WriteHeader(http.StatusOK)
-				res.Write(dbRes.([]byte))
+				res.Write(dbRes)
 				doneChan <- true
 			}
 		})

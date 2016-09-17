@@ -111,8 +111,9 @@ func (d *Driver) createPod(newPod *Pod) error {
 	return d.create("/api/v1/namespaces/maestro/pods", "maestro worker", body)
 }
 
-func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
-	confVol, volErr := NewVolume(fmt.Sprintf("%s-conf", name), hostVolume, d)
+func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
+	dPtr := &d
+	confVol, volErr := NewVolume(fmt.Sprintf("%s-conf", name), hostVolume, dPtr)
 	if volErr != nil {
 		return volErr
 	}
@@ -132,5 +133,5 @@ func (d *Driver) Run(name, confTarget, hostVolume string, args []string) error {
 			RestartPolicy: "Never",
 		},
 	}
-	return d.createPod(newPod)
+	return dPtr.createPod(newPod)
 }

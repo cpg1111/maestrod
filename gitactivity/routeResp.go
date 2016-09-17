@@ -1,4 +1,4 @@
-package server
+package gitactivity
 
 // RouteResp is a struct representing the response to a get on a route that displays subroutes
 type RouteResp struct {
