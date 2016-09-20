@@ -71,6 +71,7 @@ type Container struct {
 	Env             []envVar      `json:"env,omitempty"`
 	VolumeMounts    []volumeMount `json:"volumeMounts,omitempty"`
 	SecurityContext *secCtx       `json:"securityContext,omitempty"`
+	TTY             bool          `json:"tty,omitempty"`
 }
 
 func NewContainer(maestroVersion string, cmd []string, vol volumeMount, sec *secCtx) *Container {
@@ -80,5 +81,6 @@ func NewContainer(maestroVersion string, cmd []string, vol volumeMount, sec *sec
 		Command:         cmd,
 		VolumeMounts:    []volumeMount{vol},
 		SecurityContext: sec,
+		TTY:             true,
 	}
 }

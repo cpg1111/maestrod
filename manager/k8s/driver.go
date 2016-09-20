@@ -18,13 +18,13 @@ type Driver struct {
 	Client         *http.Client
 }
 
-func New(host, maestroVersion string, conf *config.Server) *Driver {
+func New(maestroVersion string, conf *config.Server) *Driver {
 	authTransport, authErr := NewAuthTransport(conf)
 	if authErr != nil {
 		panic(authErr)
 	}
 	return &Driver{
-		Host:           host,
+		Host:           manager.GetTarget(conf),
 		MaestroVersion: maestroVersion,
 		Client: &http.Client{
 			Transport: authTransport,

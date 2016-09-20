@@ -8,11 +8,9 @@ import (
 	"github.com/cpg1111/maestrod/config"
 )
 
-var K8S = os.Getenv("TEST_K8S_URL")
-
 var conf, confErr = config.Load(fmt.Sprintf("%s/src/github.com/cpg1111/maestrod/example.conf.toml", os.Getenv("GOPATH")))
 
-var driver = New(K8S, os.Getenv("TEST_MAESTRO_VER"), &conf.Server)
+var driver = New(os.Getenv("TEST_MAESTRO_VER"), &conf.Server)
 
 func TestRun(t *testing.T) {
 	if confErr != nil {

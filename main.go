@@ -90,14 +90,14 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 func getManager(conf *config.Config) manager.Driver {
 	switch conf.Server.Runtime {
 	case "docker":
-		driver, dErr := docker.New(conf.Server.TargetHost, "v1.23", conf.Server.MaestroVersion)
+		driver, dErr := docker.New("v1.23", conf.Server.MaestroVersion)
 		if dErr != nil {
 			log.Fatal(dErr)
 		}
 		return *driver
 	case "kubernetes":
 	case "k8s":
-		driver := k8s.New(conf.Server.TargetHost, conf.Server.MaestroVersion, &conf.Server)
+		driver := k8s.New(conf.Server.MaestroVersion, &conf.Server)
 		return *driver
 	default:
 		log.Fatal("specifcied runtime is not supported yet, please create an issue @ https://github.com/cpg1111/maestrod")

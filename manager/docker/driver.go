@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cpg1111/maestrod/manager"
-
 	dockerEngine "github.com/docker/engine-api/client"
 	dockerTypes "github.com/docker/engine-api/types"
 	dockerContainer "github.com/docker/engine-api/types/container"
 	dockerNetwork "github.com/docker/engine-api/types/network"
 	"golang.org/x/net/context"
+
+	"github.com/cpg1111/maestrod/manager"
 )
 
 // Driver is the driver to the docker daemon
@@ -25,7 +25,7 @@ type Driver struct {
 }
 
 // New returns a pointer to an instance of Driver and an error
-func New(host, apiVersion, maestroVersion string) (*Driver, error) {
+func New(apiVersion, maestroVersion string) (*Driver, error) {
 	dClient, dockerErr := dockerEngine.NewEnvClient()
 	if dockerErr != nil {
 		return nil, dockerErr

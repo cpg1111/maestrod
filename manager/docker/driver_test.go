@@ -7,7 +7,7 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	driver, err := New(os.Getenv("DOCKER_HOST"), "v1.23", "latest")
+	driver, err := New("v1.23", "latest")
 	if err != nil {
 		t.Error(err)
 	}
