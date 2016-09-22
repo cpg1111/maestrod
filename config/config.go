@@ -29,7 +29,11 @@ type Server struct {
 	DataStoreStaticIP   string
 	DataStoreEnvPort    string
 	DataStoreStaticPort string
+	TargetProtocol      string
 	TargetHost          string
+	TargetPort          string
+	TargetEnvHost       string
+	TargetEnvPort       string
 	ClientCertPath      string
 	ClientKeyPath       string
 	ServerCertPath      string
