@@ -11,6 +11,7 @@ type podSpec struct {
 	RestartPolicy string      `json:"restartPolicy,omitempty"`
 }
 
+// Pod is a struct for creating k8s pods
 type Pod struct {
 	Kind       string      `json:"kind"`
 	ApiVersion string      `json:"apiVersion"`

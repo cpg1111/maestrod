@@ -72,6 +72,7 @@ type flocker struct {
 	DatasetName string `json:"datasetName,omitempty"`
 }
 
+// Volume is a struct for creating volumes in k8s
 type Volume struct {
 	Name                  string                `json:"name"`
 	Type                  string                `json:"-"`
@@ -85,6 +86,7 @@ type Volume struct {
 	Flocker               *flocker              `json:"flocker,omitempty"`
 }
 
+// DelegateType picks what type of volume to use
 func (v *Volume) DelegateType(confTarget, confTargetPrefix string, volumeConf *config.Mount) {
 	if volumeConf != nil && volumeConf.Kind != confTargetPrefix {
 		log.Fatal("mount configuration mismatch")
@@ -204,6 +206,7 @@ func getVolume(name, confTarget string) Volume {
 	return vol
 }
 
+// NewVolume returns a pointer to a volume or an error
 func NewVolume(name, confTarget string, driver *Driver) (*Volume, error) {
 	vol := getVolume(name, confTarget)
 	volPtr := &vol

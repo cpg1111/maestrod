@@ -6,8 +6,10 @@ import (
 	"net/http"
 )
 
+// ErrorHandler handles HTTP errors
 type ErrorHandler struct{}
 
+// ErrorResp is the default response for errors
 type ErrorResp struct {
 	Error  string `json:"error"`
 	Status uint   `json:"status"`

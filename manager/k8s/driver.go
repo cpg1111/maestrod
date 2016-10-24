@@ -119,7 +119,7 @@ func (d *Driver) createPod(newPod *Pod) error {
 // Run will run a maestro pod in kubernetes
 func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	dPtr := &d
-	name = strings.Replace(name, "/", "-", -1)
+	name = strings.Replace(strings.Replace(name, "/", "-", -1), "_", "-", -1)
 	confVol, volErr := NewVolume(fmt.Sprintf("%s-conf", name), hostVolume, dPtr)
 	if volErr != nil {
 		return volErr

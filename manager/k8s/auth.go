@@ -26,6 +26,8 @@ func loadCerts(conf *config.Server) (*tls.Config, error) {
 	return &tls.Config{Certificates: []tls.Certificate{*certificate}}, nil
 }
 
+// NewAuthTransport returns a pointer to an http.Transport for authentication
+// with k8s or returns an error
 func NewAuthTransport(conf *config.Server) (*http.Transport, error) {
 	if conf.RuntimeTLSClient {
 		tlsConf, tlsErr := loadCerts(conf)

@@ -10,17 +10,20 @@ import (
 	"github.com/cpg1111/maestrod/datastore"
 )
 
+// Handler handles HTTP for statecom
 type Handler struct {
 	http.Handler
 	Store datastore.Datastore
 }
 
+// NewHandler returns a pointer to a Handler struct
 func NewHandler(store *datastore.Datastore) *Handler {
 	return &Handler{
 		Store: *store,
 	}
 }
 
+// ServeHTTP serves HTTP for statecom
 func (h Handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
@@ -38,6 +41,7 @@ func (h Handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// Get gets the state of a project or projects
 func (h *Handler) Get(res http.ResponseWriter, req *http.Request) {
 	query := req.URL.Query()
 	project := query.Get("project")
@@ -108,6 +112,7 @@ func serviceStateKey(body map[string]interface{}) string {
 	return fmt.Sprintf("states/%s/%s/%s/%s", state["Project"], state["Branch"], body["Name"], state["TimeStamp"])
 }
 
+// Create creats state of projects
 func (h Handler) Create(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	var body []byte
@@ -145,6 +150,7 @@ func (h Handler) Create(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte("201 Created"))
 }
 
+// HandleUnsupported handles any unsupported methods
 func (h Handler) HandleUnsupported(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	res.WriteHeader(405)

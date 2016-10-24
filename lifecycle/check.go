@@ -39,15 +39,20 @@ func Check(conf *config.Config, queue *Queue, running *Running, manager manager.
 				}
 				confPath := conf.Projects[i].MaestroConfPath
 				log.Println("Running build")
-				runErr := manager.Run(next.Project, confDir(confPath), confDir(confPath), []string{
-					"maestro",
-					fmt.Sprintf("--branch=%s", next.Branch),
-					fmt.Sprintf("--deploy=%v", shouldDeploy),
-					fmt.Sprintf("--prev-commit=%s", next.PrevCommit),
-					fmt.Sprintf("--curr-commit=%s", next.CurrCommit),
-					fmt.Sprintf("--config=%s", confPath),
-					fmt.Sprintf("--clone-path=%s", conf.Server.WorkspaceDir),
-				})
+				runErr := manager.Run(
+					fmt.Sprintf("%s-%s", next.Project, next.Branch),
+					confDir(confPath),
+					confDir(confPath),
+					[]string{
+						"maestro",
+						fmt.Sprintf("--branch=%s", next.Branch),
+						fmt.Sprintf("--deploy=%v", shouldDeploy),
+						fmt.Sprintf("--prev-commit=%s", next.PrevCommit),
+						fmt.Sprintf("--curr-commit=%s", next.CurrCommit),
+						fmt.Sprintf("--config=%s", confPath),
+						fmt.Sprintf("--clone-path=%s", conf.Server.WorkspaceDir),
+					},
+				)
 				return runErr
 			}
 		}
