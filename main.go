@@ -74,10 +74,13 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 		log.Println("redis datastore created")
 	case "etcd2":
 		store, storeErr = etcd2.NewV2(datastoreHost, datastorePort)
+		log.Println("etcd2 datastore created")
 	case "etcd3":
 		store, storeErr = etcd3.NewV3(datastoreHost, datastorePort)
+		log.Println("etcd3 datastore created")
 	case "mongodb":
 		store, storeErr = mongodb.New(datastoreHost, datastorePort, conf.Server.DataStoreUser, conf.Server.DataStorePWD)
+		log.Println("mongodb datastore create")
 	default:
 		log.Fatal("specifcied datastore currently not supported, please create an issue @ https://github.com/cpg1111/maestrod")
 	}

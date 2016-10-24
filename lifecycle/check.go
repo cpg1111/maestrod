@@ -23,9 +23,10 @@ func Check(conf *config.Config, queue *Queue, running *Running, manager manager.
 	log.Println("Checking for a job to run")
 	log.Println("Queue: ", *queue)
 	next := queue.Pop(running, conf.Server.MaxBuilds)
-	log.Println("About to build this on: ", next)
 	if next != nil {
+		log.Println("About to build this on: ", next)
 		for i := range conf.Projects {
+			log.Println(next.Project, conf.Projects[i].Name)
 			if next.Project == conf.Projects[i].Name {
 				shouldDeploy := false
 				log.Println("Found a job to run")

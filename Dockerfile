@@ -1,3 +1,3 @@
 FROM debian:jessie
-COPY ./dist/maestrod/ ~/maestrod/
-CMD ["~/maestrod/maestrod", "--config-path=/etc/maestrod/example.conf.toml"]
+COPY ./dist/maestrod/ /opt/maestrod/
+ENTRYPOINT ["/opt/maestrod/maestrod"]
