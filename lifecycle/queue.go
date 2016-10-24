@@ -75,6 +75,7 @@ func (q *Queue) Pop(r *Running, maxBuilds int) *QueueEntry {
 	return nil
 }
 
+// SnapShot saves the queue's current state
 func (q *Queue) SnapShot() error {
 	errChan := make(chan error)
 	store := *q.store

@@ -58,9 +58,11 @@ func Run(conf *config.Server, dstore *datastore.Datastore, queue *lifecycle.Queu
 	indexHandler := NewIndexHandler()
 	projectHandler := NewProjectHandler()
 	pushHandler := NewPushHandler(queue)
+	prHandler := NewPRHandler(queue)
 	server.Handle(indexHandler.Route, indexHandler)
 	server.Handle(projectHandler.Route, projectHandler)
 	server.Handle(pushHandler.Route, pushHandler)
+	server.Handle(prHandler.Route, prHandler)
 	if conf.RuntimeTLSServer {
 		sAddr := fmt.Sprintf("%s:%d", conf.Host, conf.SecurePort)
 		iAddr := fmt.Sprintf("%s:%d", conf.Host, conf.InsecurePort)

@@ -61,6 +61,7 @@ func newMount(name string) *volumeMount {
 	}
 }
 
+// Container is a struct reoresenting a k8s container API object
 type Container struct {
 	Name            string        `json:"name"`
 	Image           string        `json:"image"`
@@ -74,12 +75,13 @@ type Container struct {
 	TTY             bool          `json:"tty,omitempty"`
 }
 
-func NewContainer(maestroVersion string, cmd []string, vol volumeMount, sec *secCtx) *Container {
+// NewContainer returns a pointer to a Container struct
+func NewContainer(maestroVersion string, cmd []string, vols []volumeMount, sec *secCtx) *Container {
 	return &Container{
-		Name:            fmt.Sprintf("maestro-%s", maestroVersion),
+		Name:            "maestro",
 		Image:           fmt.Sprintf("cpg1111/maestro:%s", maestroVersion),
 		Command:         cmd,
-		VolumeMounts:    []volumeMount{vol},
+		VolumeMounts:    vols,
 		SecurityContext: sec,
 		TTY:             true,
 	}

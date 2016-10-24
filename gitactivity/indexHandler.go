@@ -14,7 +14,7 @@ type IndexSubHandler struct {
 
 // Get is the get method for /
 func (i IndexSubHandler) Get(res http.ResponseWriter, req *http.Request) {
-	routeResp := RouteResp{Routes: []string{"/push", "/project"}}
+	routeResp := RouteResp{Routes: []string{"/push", "/project", "/pullrequest"}}
 	log.Println(routeResp)
 	encErr := json.NewEncoder(res).Encode(routeResp)
 	if encErr != nil {
