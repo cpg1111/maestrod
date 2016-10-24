@@ -76,6 +76,7 @@ func (p PushSubHandler) Post(res http.ResponseWriter, req *http.Request) {
 	log.Println("Adding Job to Queue: ", payload.Repository.FullName, branchName, payload.Before)
 	p.Queue.Add(payload.Repository.FullName, branchName, payload.Before, payload.After)
 	resp := PostResp{Status: 201, Message: "Created"}
+	res.WriteHeader(http.StatusCreated)
 	json.NewEncoder(res).Encode(resp)
 }
 

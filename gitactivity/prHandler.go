@@ -92,6 +92,7 @@ func (pr PRSubHandler) Post(res http.ResponseWriter, req *http.Request) {
 		pullRequest.Head.SHA,
 	)
 	resp := PostResp{Status: 201, Message: "Created"}
+	res.WriteHeader(http.StatusCreated)
 	json.NewEncoder(res).Encode(resp)
 }
 
