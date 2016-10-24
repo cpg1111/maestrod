@@ -10,6 +10,7 @@ import (
 	mgo "gopkg.in/mgo.v2"
 )
 
+// MongoStore is the struct for the MongoDB driver
 type MongoStore struct {
 	datastore.Datastore
 	store *mgo.Session
@@ -23,6 +24,7 @@ type mongoQuery struct {
 
 type mongoRes struct{}
 
+// New returns a pointer to a MongoStore struct or an error
 func New(host, port, username, password string) (*MongoStore, error) {
 	info := &mgo.DialInfo{
 		Addrs:    []string{fmt.Sprintf("%s:%s", host, port)},
@@ -51,6 +53,7 @@ func New(host, port, username, password string) (*MongoStore, error) {
 	}, nil
 }
 
+// Save saves data in mongo
 func (m MongoStore) Save(key string, data interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		collection := m.db.C(key)
@@ -59,6 +62,7 @@ func (m MongoStore) Save(key string, data interface{}, callback datastore.NoResu
 	}()
 }
 
+// Find finds data in mongo
 func (m MongoStore) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
 		query := &mongoQuery{}
@@ -80,6 +84,7 @@ func (m MongoStore) Find(queryStr string, callback datastore.ResultCallback) {
 	}()
 }
 
+// Remove removes data from mongo
 func (m MongoStore) Remove(queryStr string, callback datastore.NoResultCallback) {
 	go func() {
 		query := &mongoQuery{}
@@ -94,6 +99,7 @@ func (m MongoStore) Remove(queryStr string, callback datastore.NoResultCallback)
 	}()
 }
 
+// Update updates data in mongo
 func (m MongoStore) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		query := &mongoQuery{}
@@ -108,6 +114,7 @@ func (m MongoStore) Update(queryStr string, update interface{}, callback datasto
 	}()
 }
 
+// FindAndUpdate updates data and returns it from mongo
 func (m MongoStore) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
 	doneChan := make(chan bool)
 	go m.Update(queryStr, update, func(err error) {

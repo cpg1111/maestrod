@@ -9,6 +9,7 @@ import (
 	"github.com/cpg1111/maestrod/datastore"
 )
 
+// Run runs the statecom server
 func Run(host, certPath, keyPath string, port int, store *datastore.Datastore) {
 	go func() {
 		handler := NewHandler(store)

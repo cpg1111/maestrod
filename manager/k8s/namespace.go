@@ -13,6 +13,7 @@ type nsMetadata struct {
 	DeletionGracePeriodSeconds int    `json:"deletionGracePeriodSeconds,omitempty"`
 }
 
+// Namespace is a struct for creating k8s Namespaces
 type Namespace struct {
 	Kind       string     `json:"kind"`
 	ApiVersion string     `json:"apiVersion"`

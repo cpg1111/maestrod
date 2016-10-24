@@ -13,6 +13,7 @@ type saMetadata struct {
 	DeletionGracePeriodSeconds int    `json:"deletionGracePeriodSeconds,omitempty"`
 }
 
+// ServiceAccount is a struct for creating svc accnts
 type ServiceAccount struct {
 	Kind       string     `json:"kind"`
 	ApiVersion string     `json:"apiVersion"`

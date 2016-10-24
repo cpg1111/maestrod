@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Etcd2 is a struct for the Etcd v2 driver
 type Etcd2 struct {
 	datastore.Datastore
 	Client *etcdv2.Client
@@ -21,6 +22,7 @@ func getEndpoint(host, port string) string {
 	return fmt.Sprintf("http://%s:%s", host, port)
 }
 
+// NewV2 returns a pointer to an Etcd2 driver or an error
 func NewV2(host, port string) (*Etcd2, error) {
 	cfg := etcdv2.Config{
 		Endpoints:               []string{getEndpoint(host, port)},
@@ -38,6 +40,7 @@ func NewV2(host, port string) (*Etcd2, error) {
 	}, nil
 }
 
+// Save saves data in etcd
 func (e Etcd2) Save(key string, data interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		value, marshErr := json.Marshal(data)
@@ -50,6 +53,7 @@ func (e Etcd2) Save(key string, data interface{}, callback datastore.NoResultCal
 	}()
 }
 
+// Find finds data in etcd
 func (e Etcd2) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
 		resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
@@ -57,6 +61,7 @@ func (e Etcd2) Find(queryStr string, callback datastore.ResultCallback) {
 	}()
 }
 
+// Remove removes data in etcd
 func (e Etcd2) Remove(queryStr string, callback datastore.NoResultCallback) {
 	go func() {
 		_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
@@ -64,6 +69,7 @@ func (e Etcd2) Remove(queryStr string, callback datastore.NoResultCallback) {
 	}()
 }
 
+// Update updates data in etcd
 func (e Etcd2) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		value, marshErr := json.Marshal(update)
@@ -76,6 +82,7 @@ func (e Etcd2) Update(queryStr string, update interface{}, callback datastore.No
 	}()
 }
 
+// FindAndUpdate updates data, then returns it
 func (e Etcd2) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
 	go func() {
 		value, marshErr := json.Marshal(update)

@@ -6,6 +6,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+// Mount is a struct in the config for Runtime mounts
 type Mount struct {
 	Kind      string
 	ID        string
@@ -17,6 +18,7 @@ type Mount struct {
 	ReadOnly  bool
 }
 
+// Server is a struct for the runtime server
 type Server struct {
 	Runtime             string
 	RuntimeTLSClient    bool
@@ -46,6 +48,7 @@ type Server struct {
 	WorkspaceDir        string
 }
 
+// Project is a struct in the config for each project for maestrod to spin up
 type Project struct {
 	Name            string   `json:"name"`
 	MaestroConfPath string   `json:"confPath"`

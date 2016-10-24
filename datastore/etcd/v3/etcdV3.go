@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Etcd3 is a struct for the etcd v3 driver
 type Etcd3 struct {
 	datastore.Datastore
 	Client *etcdv3.Client
@@ -21,6 +22,7 @@ func getEndpoint(host, port string) string {
 	return fmt.Sprintf("http://%s:%s", host, port)
 }
 
+// NewV3 returns a pointer to an Etcd3 struct or an error
 func NewV3(host, port string) (*Etcd3, error) {
 	cfg := etcdv3.Config{
 		Endpoints:   []string{getEndpoint(host, port)},
@@ -36,6 +38,7 @@ func NewV3(host, port string) (*Etcd3, error) {
 	}, nil
 }
 
+// Save saves data in etcd
 func (e Etcd3) Save(key string, data interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		value, marshErr := json.Marshal(data)
@@ -48,6 +51,7 @@ func (e Etcd3) Save(key string, data interface{}, callback datastore.NoResultCal
 	}()
 }
 
+// Find finds data in etcd
 func (e Etcd3) Find(queryStr string, callback datastore.ResultCallback) {
 	go func() {
 		resp, respErr := e.Key.Get(context.Background(), queryStr)
@@ -59,6 +63,7 @@ func (e Etcd3) Find(queryStr string, callback datastore.ResultCallback) {
 	}()
 }
 
+// Remove removes data in etcd
 func (e Etcd3) Remove(queryStr string, callback datastore.NoResultCallback) {
 	go func() {
 		_, delErr := e.Key.Delete(context.Background(), queryStr)
@@ -67,6 +72,7 @@ func (e Etcd3) Remove(queryStr string, callback datastore.NoResultCallback) {
 	}()
 }
 
+// Update updates data in etcd
 func (e Etcd3) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
 	go func() {
 		value, marshErr := json.Marshal(update)
@@ -79,6 +85,7 @@ func (e Etcd3) Update(queryStr string, update interface{}, callback datastore.No
 	}()
 }
 
+// FindAndUpdate updates data and returns it from etcd
 func (e Etcd3) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
 	go func() {
 		value, marshErr := json.Marshal(update)

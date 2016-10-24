@@ -7,11 +7,13 @@ import (
 	"github.com/cpg1111/maestrod/config"
 )
 
+// ProjectSubHandler handles creating and deleting projects
 type ProjectSubHandler struct {
 	SubHandler
 	Error ErrorHandler
 }
 
+// Get returns metadata on a project
 func (p ProjectSubHandler) Get(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	queries := req.URL.Query()
@@ -37,6 +39,7 @@ func (p ProjectSubHandler) Get(res http.ResponseWriter, req *http.Request) {
 	_ = <-doneChan
 }
 
+// Post creates a project's metadata
 func (p ProjectSubHandler) Post(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	decoder := json.NewDecoder(req.Body)
@@ -59,6 +62,7 @@ func (p ProjectSubHandler) Post(res http.ResponseWriter, req *http.Request) {
 	_ = <-doneChan
 }
 
+// Put edits a project's metadata
 func (p ProjectSubHandler) Put(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	decoder := json.NewDecoder(req.Body)
@@ -81,10 +85,12 @@ func (p ProjectSubHandler) Put(res http.ResponseWriter, req *http.Request) {
 	_ = <-doneChan
 }
 
+// Patch does nothing
 func (p ProjectSubHandler) Patch(res http.ResponseWriter, req *http.Request) {
 	p.Error.handle404(res, req)
 }
 
+// Delete removes a projects metadata
 func (p ProjectSubHandler) Delete(res http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	queries := req.URL.Query()
@@ -102,6 +108,7 @@ func (p ProjectSubHandler) Delete(res http.ResponseWriter, req *http.Request) {
 	_ = <-doneChan
 }
 
+// NewProjectHandler returns a pointer to a RouteHandler for ProjectSubHandler
 func NewProjectHandler() *RouteHandler {
 	return &RouteHandler{
 		Route: "/project",
