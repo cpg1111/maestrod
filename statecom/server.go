@@ -7,12 +7,13 @@ import (
 
 	"github.com/cpg1111/maestrod/cert"
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/lifecycle"
 )
 
 // Run runs the statecom server
-func Run(host, certPath, keyPath string, port int, store *datastore.Datastore) {
+func Run(host, certPath, keyPath string, port int, store *datastore.Datastore, running *lifecycle.Running) {
 	go func() {
-		handler := NewHandler(store)
+		handler := NewHandler(store, running)
 		mux := http.NewServeMux()
 		mux.Handle("/state", handler)
 		server := &http.Server{

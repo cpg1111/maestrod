@@ -11,10 +11,10 @@ import (
 
 func confDir(confPath string) string {
 	confArr := strings.Split(confPath, "/")
-	res := ""
+	var res string
 	for i := range confArr[0 : len(confArr)-1] {
 		if len(res) == 0 {
-			res = confArr[i]
+			res = fmt.Sprintf("/%s", confArr[i])
 		} else {
 			res = fmt.Sprintf("%s/%s", res, confArr[i])
 		}
@@ -26,11 +26,11 @@ func confDir(confPath string) string {
 func Check(conf *config.Config, queue *Queue, running *Running, manager manager.Driver) error {
 	log.Println("Checking for a job to run")
 	log.Println("Queue: ", *queue)
+	running.Watch(&manager)
 	next := queue.Pop(running, conf.Server.MaxBuilds)
 	if next != nil {
-		log.Println("About to build this on: ", next)
+		log.Println("About to build: ", next.Project, next.Branch)
 		for i := range conf.Projects {
-			log.Println(next.Project, conf.Projects[i].Name)
 			if next.Project == conf.Projects[i].Name {
 				shouldDeploy := false
 				log.Println("Found a job to run")

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/manager"
 )
 
 // QueueEntry is an entry in the waiting and running queue
@@ -17,9 +18,46 @@ type QueueEntry struct {
 	Status     string
 }
 
+type aliveKey struct {
+	Project string
+	Branch  string
+}
+
 // Running is the running queue
 type Running struct {
-	Builds []*QueueEntry
+	Builds    []*QueueEntry
+	Alive     map[aliveKey]*QueueEntry
+	KeepAlive map[aliveKey]bool
+}
+
+// CheckIn changes whether a build is alive or not
+func (r *Running) CheckIn(project, branch string) {
+	key := aliveKey{
+		Project: project,
+		Branch:  branch,
+	}
+	if r.Alive[key] != nil {
+		r.KeepAlive[key] = true
+	}
+}
+
+// Watch watches running maestro builds
+func (r *Running) Watch(manager *manager.Driver) {
+	for b := range r.Builds {
+		key := aliveKey{
+			Project: r.Builds[b].Project,
+			Branch:  r.Builds[b].Branch,
+		}
+		if r.Alive[key] == nil {
+			r.Builds = append(r.Builds[:b], r.Builds[b+1:]...)
+			break
+		}
+		if !r.KeepAlive[key] {
+			r.Alive[key] = nil
+			mgrDRef := *manager
+			mgrDRef.DestroyWorker(key.Project, key.Branch)
+		}
+	}
 }
 
 // Queue is the qaiting queue
@@ -67,6 +105,11 @@ func (q *Queue) Pop(r *Running, maxBuilds int) *QueueEntry {
 		for i := range r.Builds {
 			if !(r.Builds[i].Project == next.Project && r.Builds[i].Branch == next.Branch) {
 				r.Builds = append(r.Builds, next)
+				key := aliveKey{
+					Project: next.Project,
+					Branch:  next.Branch,
+				}
+				r.Alive[key] = next
 				q.Queue = q.Queue[1:]
 				return next
 			}

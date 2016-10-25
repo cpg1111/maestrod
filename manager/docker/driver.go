@@ -158,6 +158,12 @@ func (d *Driver) start(ctx context.Context) error {
 	return d.client.ContainerStart(ctx, d.containerID, dockerTypes.ContainerStartOptions{})
 }
 
+// DestroyWorker destroys a maestro worker
+func (d Driver) DestroyWorker(project, branch string) error {
+	dPtr := &d
+	return dPtr.remove(context.Background(), d.containerID)
+}
+
 // Run runs a maestro container on the docker daemon
 func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	d.containerID = fmt.Sprintf("maestro-%s", name)

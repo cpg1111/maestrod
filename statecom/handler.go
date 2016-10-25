@@ -8,18 +8,21 @@ import (
 	"net/url"
 
 	"github.com/cpg1111/maestrod/datastore"
+	"github.com/cpg1111/maestrod/lifecycle"
 )
 
 // Handler handles HTTP for statecom
 type Handler struct {
 	http.Handler
-	Store datastore.Datastore
+	Store   datastore.Datastore
+	Running *lifecycle.Running
 }
 
 // NewHandler returns a pointer to a Handler struct
-func NewHandler(store *datastore.Datastore) *Handler {
+func NewHandler(store *datastore.Datastore, running *lifecycle.Running) *Handler {
 	return &Handler{
-		Store: *store,
+		Store:   *store,
+		Running: running,
 	}
 }
 
@@ -148,6 +151,7 @@ func (h Handler) Create(res http.ResponseWriter, req *http.Request) {
 	}
 	res.WriteHeader(201)
 	res.Write([]byte("201 Created"))
+	h.Running.CheckIn(bodyMap["Project"].(string), bodyMap["Branch"].(string))
 }
 
 // HandleUnsupported handles any unsupported methods
