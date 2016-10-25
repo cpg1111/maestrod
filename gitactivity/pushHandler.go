@@ -9,6 +9,7 @@ import (
 	"github.com/cpg1111/maestrod/lifecycle"
 )
 
+// PushSubHandler is the subhandler for handling push hooks
 type PushSubHandler struct {
 	SubHandler
 	Error ErrorHandler
@@ -73,7 +74,7 @@ func (p PushSubHandler) Post(res http.ResponseWriter, req *http.Request) {
 	payload := &pushPayload{}
 	decoder.Decode(payload)
 	branchName := strings.Replace(payload.Ref, "refs/heads/", "", -1)
-	log.Println("Adding Job to Queue: ", payload.Repository.FullName, branchName, payload.Before)
+	log.Println("Adding Job to Queue: ", payload.Repository.FullName, branchName, payload.Before, payload.After)
 	p.Queue.Add(payload.Repository.FullName, branchName, payload.Before, payload.After)
 	resp := PostResp{Status: 201, Message: "Created"}
 	res.WriteHeader(http.StatusCreated)

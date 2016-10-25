@@ -37,21 +37,38 @@ func New(maestroVersion string, conf *config.Config) *Driver {
 	}
 }
 
+func readRes(res *http.Response, errObj string, status int) error {
+	defer res.Body.Close()
+	resBody, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return readErr
+	}
+	if res.StatusCode != status {
+		return fmt.Errorf("did not %s, received  %d \n %s", errObj, res.StatusCode, (string)(resBody))
+	}
+	return nil
+}
+
 func (d *Driver) create(url, errObj string, body []byte) error {
 	bodyReader := bytes.NewReader(body)
 	res, postErr := d.Client.Post(fmt.Sprintf("%s%s", d.Host, url), "application/json", bodyReader)
 	if postErr != nil {
 		return postErr
 	}
-	defer res.Body.Close()
-	resBody, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return readErr
+	return readRes(res, errObj, 201)
+}
+
+func (d *Driver) destroy(url, errObj string, body []byte) error {
+	bodyReader := bytes.NewReader(body)
+	req, reqErr := http.NewRequest("DELETE", fmt.Sprintf("%s%s", d.Host, url), bodyReader)
+	if reqErr != nil {
+		return reqErr
 	}
-	if res.StatusCode != 201 {
-		return fmt.Errorf("did not create %s, received  %v \n %s", errObj, res.StatusCode, (string)(resBody))
+	res, delErr := d.Client.Do(req)
+	if delErr != nil {
+		return delErr
 	}
-	return nil
+	return readRes(res, errObj, 200)
 }
 
 func (d *Driver) check(url string) (bool, error) {
@@ -84,7 +101,7 @@ func (d *Driver) CreateNamespace(namespace string) error {
 	if marshErr != nil {
 		return marshErr
 	}
-	return d.create("/api/v1/namespaces", "namespace", body)
+	return d.create("/api/v1/namespaces", "create namespace", body)
 }
 
 // CreateSvcAccnt creates a kubernetes svc accnt
@@ -107,7 +124,7 @@ func (d *Driver) CreateSvcAccnt(name string) error {
 	if marshErr != nil {
 		return marshErr
 	}
-	return d.create("/api/namepsaces/maestro/serviceaccounts", "service account", body)
+	return d.create("/api/namepsaces/maestro/serviceaccounts", "create service account", body)
 }
 
 func (d *Driver) createPod(newPod *Pod) error {
@@ -115,7 +132,26 @@ func (d *Driver) createPod(newPod *Pod) error {
 	if marshErr != nil {
 		return marshErr
 	}
-	return d.create("/api/v1/namespaces/maestro/pods", "maestro worker", body)
+	return d.create("/api/v1/namespaces/maestro/pods", "create maestro worker", body)
+}
+
+// DestroyWorker will delete a maestro pod
+func (d Driver) DestroyWorker(project, branch string) error {
+	kubifiedProj := strings.Replace(project, "/", "-", -1)
+	deletePayload := map[string]string{
+		"kind":               "Pod",
+		"apiVersion":         "v1",
+		"gracePeriodSeconds": "5",
+	}
+	body, marshErr := json.Marshal(deletePayload)
+	if marshErr != nil {
+		return marshErr
+	}
+	return d.destroy(
+		fmt.Sprintf("/api/v1/namespaces/maestro/pods/%s-%s", kubifiedProj, branch),
+		"delete maestro worker",
+		body,
+	)
 }
 
 func (d *Driver) createVolumes(confName, hostVol string) ([]Volume, error) {

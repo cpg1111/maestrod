@@ -111,11 +111,18 @@ func getManager(conf *config.Config) manager.Driver {
 func main() {
 	conf := getConf()
 	store := getDataStore(conf)
-	queue := lifecycle.NewQueue(store)
-	gitactivity.Run(&conf.Server, store, queue)
-	statecom.Run(conf.Server.Host, conf.Server.ServerCertPath, conf.Server.ServerKeyPath, (int)(conf.Server.StateComPort), store)
-	running := &lifecycle.Running{}
 	managerDriver := getManager(conf)
+	queue := lifecycle.NewQueue(store)
+	running := &lifecycle.Running{}
+	gitactivity.Run(&conf.Server, store, queue)
+	statecom.Run(
+		conf.Server.Host,
+		conf.Server.ServerCertPath,
+		conf.Server.ServerKeyPath,
+		(int)(conf.Server.StateComPort),
+		store,
+		running,
+	)
 	var err error
 	for err == nil {
 		err = lifecycle.Check(conf, queue, running, managerDriver)
