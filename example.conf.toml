@@ -1,5 +1,6 @@
 [Server]
 Runtime="docker"
+RuntimePluginPath="/etc/maestrod/plugin.d/docker"
 RuntimeTLSClient=true
 RuntimeTLSServer=true
 MaxBuilds=6

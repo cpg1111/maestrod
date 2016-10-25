@@ -4,6 +4,8 @@ get-deps:
 build:
 	glide install
 	go build -o maestrod main.go
+	go build -buildmode=plugin -o docker.so manager/docker/plugin.go
+	go build -buildmode=plugin -o kube.so manager/k8s/plugin.go
 test:
 	ETCD2_SERVICE_HOST=127.0.0.1 ETCD2_SERVICE_PORT=22379 go test ./datastore/etcd/v2/...
 	ETCD3_SERVICE_HOST=127.0.0.1 ETCD3_SERVICE_PORT=32379 go test ./datastore/etcd/v3/...
@@ -27,6 +29,9 @@ install:
 	mkdir -p /etc/maestrod/
 	cp maestrod /opt/bin/maestrod/maestrod
 	cp example.conf.toml /etc/maestrod/conf.toml
+	mkdir -p /etc/maestrod/conf.d/ /etc/maestrod/plugin.d/
+	cp docker.so /etc/maestrod/plugin.d/
+	cp kube.so /etc/maestrod/plugin.d/
 docker:
 	docker build -t maestrod-build -f Dockerfile_build .
 	docker run -v `pwd`/dist/:/opt/bin/maestrod/ maestrod-build
