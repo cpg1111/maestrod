@@ -11,9 +11,13 @@ import (
 
 func confDir(confPath string) string {
 	confArr := strings.Split(confPath, "/")
-	res := "/"
+	res := ""
 	for i := range confArr[0 : len(confArr)-1] {
-		res = fmt.Sprintf("%s/%s", res, confArr[i])
+		if len(res) == 0 {
+			res = confArr[i]
+		} else {
+			res = fmt.Sprintf("%s/%s", res, confArr[i])
+		}
 	}
 	return res
 }

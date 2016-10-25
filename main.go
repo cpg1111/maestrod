@@ -100,7 +100,7 @@ func getManager(conf *config.Config) manager.Driver {
 		return *driver
 	case "kubernetes":
 	case "k8s":
-		driver := k8s.New(conf.Server.MaestroVersion, &conf.Server)
+		driver := k8s.New(conf.Server.MaestroVersion, conf)
 		return *driver
 	default:
 		log.Fatal("specifcied runtime is not supported yet, please create an issue @ https://github.com/cpg1111/maestrod")
