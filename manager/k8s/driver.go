@@ -18,20 +18,22 @@ type Driver struct {
 	Host           string
 	MaestroVersion string
 	Client         *http.Client
+	Mounts         []config.Mount
 }
 
 // New returns a pointer to a k8s Driver
-func New(maestroVersion string, conf *config.Server) *Driver {
-	authTransport, authErr := NewAuthTransport(conf)
+func New(maestroVersion string, conf *config.Config) *Driver {
+	authTransport, authErr := NewAuthTransport(&conf.Server)
 	if authErr != nil {
 		panic(authErr)
 	}
 	return &Driver{
-		Host:           manager.GetTarget(conf),
+		Host:           manager.GetTarget(&conf.Server),
 		MaestroVersion: maestroVersion,
 		Client: &http.Client{
 			Transport: authTransport,
 		},
+		Mounts: conf.Mounts,
 	}
 }
 
@@ -116,22 +118,33 @@ func (d *Driver) createPod(newPod *Pod) error {
 	return d.create("/api/v1/namespaces/maestro/pods", "maestro worker", body)
 }
 
+func (d *Driver) createVolumes(confName, hostVol string) ([]Volume, error) {
+	mounts := make([]Volume, len(d.Mounts)+1)
+	confVol, volErr := NewVolume(confName, hostVol, d)
+	if volErr != nil {
+		return mounts, volErr
+	}
+	mounts[0] = *confVol
+	for m := range d.Mounts {
+		vol, vErr := NewVolume(d.Mounts[m].Name, d.Mounts[m].Path, d)
+		if vErr != nil {
+			return mounts, vErr
+		}
+		mounts[m+1] = *vol
+	}
+	return mounts, nil
+}
+
 // Run will run a maestro pod in kubernetes
 func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	dPtr := &d
 	name = strings.Replace(strings.Replace(name, "/", "-", -1), "_", "-", -1)
-	confVol, volErr := NewVolume(fmt.Sprintf("%s-conf", name), hostVolume, dPtr)
-	if volErr != nil {
-		return volErr
+	vols, vErr := dPtr.createVolumes(fmt.Sprintf("%s-conf", name), hostVolume)
+	if vErr != nil {
+		return vErr
 	}
-	dockerVol, dockerErr := NewVolume("docker-sock", "/var/run/docker.sock", dPtr)
-	if dockerErr != nil {
-		return dockerErr
-	}
+	mounts := newMounts(vols)
 	sec := &secCtx{}
-	confContainerVol := newMount(confVol.Name)
-	dockerContainerVol := newMount(dockerVol.Name)
-	mounts := []volumeMount{*confContainerVol, *dockerContainerVol}
 	maestroContainer := NewContainer(d.MaestroVersion, args, mounts, sec)
 	newPod := &Pod{
 		Kind:       "Pod",
@@ -141,7 +154,7 @@ func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
 			Namespace: "maestro",
 		},
 		Spec: podSpec{
-			Volumes:       []Volume{*confVol, *dockerVol},
+			Volumes:       vols,
 			Containers:    []Container{*maestroContainer},
 			RestartPolicy: "Never",
 		},

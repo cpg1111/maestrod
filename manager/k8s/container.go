@@ -53,12 +53,21 @@ type volumeMount struct {
 	MountPath string `json:"mountPath"`
 }
 
-func newMount(name string) *volumeMount {
+func newMount(name, path string) *volumeMount {
 	return &volumeMount{
 		Name:      name,
 		ReadOnly:  false,
-		MountPath: "/etc/maestro/",
+		MountPath: path,
 	}
+}
+
+func newMounts(vols []Volume) []volumeMount {
+	mounts := make([]volumeMount, len(vols))
+	for v := range vols {
+		mount := newMount(vols[v].Name, vols[v].HostPath.Path)
+		mounts[v] = *mount
+	}
+	return mounts
 }
 
 // Container is a struct reoresenting a k8s container API object
