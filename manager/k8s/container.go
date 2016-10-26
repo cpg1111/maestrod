@@ -92,6 +92,6 @@ func NewContainer(maestroVersion string, cmd []string, vols []volumeMount, sec *
 		Command:         cmd,
 		VolumeMounts:    vols,
 		SecurityContext: sec,
-		TTY:             true,
+		TTY:             false,
 	}
 }
