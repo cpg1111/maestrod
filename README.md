@@ -87,5 +87,7 @@ maestrod \
 --datastore-type=<datastore config override>
 ```
 
-Then add `http(s)://<public maestro ip>:<maestro port>/push` as a webhook for repo pushes and `http(s)://<public maestro ip>:<maestro port>/pullrequest` for pull request hooks.
+Then add `http(s)://<public maestro ip>:<maestro port>/push` as a webhook for repo pushes and 
+
+`http(s)://<public maestro ip>:<maestro port>/pullrequest` for pull request hooks.
 
