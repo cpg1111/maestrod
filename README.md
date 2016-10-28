@@ -74,3 +74,18 @@ Path=<path both on the host and container>
 Name=<name of volume mount>
 
 ```
+
+Then run
+
+```
+maestrod \
+--config-path=<path to config>
+--runtime=<conf override for runtime>
+--host-ip=<host to bind to config override>
+--port=<port to listen to config override>
+--workspace-dir=<path to clone projects into config override>
+--datastore-type=<datastore config override>
+```
+
+Then add `http(s)://<public maestro ip>:<maestro port>/push` as a webhook for repo pushes and `http(s)://<public maestro ip>:<maestro port>/pullrequest` for pull request hooks.
+
