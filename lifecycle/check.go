@@ -44,7 +44,7 @@ func Check(conf *config.Config, queue *Queue, running *Running, manager manager.
 				confPath := conf.Projects[i].MaestroConfPath
 				log.Println("Running build")
 				runErr := manager.Run(
-					fmt.Sprintf("%s-%s", next.Project, next.Branch),
+					fmt.Sprintf("%s-%s-%s", next.Project, next.Branch, next.CurrCommit),
 					confDir(confPath),
 					confDir(confPath),
 					[]string{
