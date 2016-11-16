@@ -171,10 +171,18 @@ func (d *Driver) createVolumes(confName, hostVol string) ([]Volume, error) {
 	return mounts, nil
 }
 
+func fmtName(name string) string {
+	name = strings.Replace(strings.Replace(name, "/", "-", -1), "_", "-", -1)
+	if len(name) > 58 {
+		return name[0:58]
+	}
+	return name
+}
+
 // Run will run a maestro pod in kubernetes
 func (d Driver) Run(name, confTarget, hostVolume string, args []string) error {
 	dPtr := &d
-	name = strings.Replace(strings.Replace(name, "/", "-", -1), "_", "-", -1)
+	name = fmtName(name)
 	vols, vErr := dPtr.createVolumes(fmt.Sprintf("%s-conf", name), hostVolume)
 	if vErr != nil {
 		return vErr
