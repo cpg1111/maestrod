@@ -84,10 +84,17 @@ type lastSuccess struct {
 	Commit string
 }
 
+func successKey(proj, branch string) string {
+	if len(branch) > 0 {
+		return fmt.Sprintf("/success/%s/%s", proj, branch)
+	}
+	return fmt.Sprintf("/success/%s", proj)
+}
+
 func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 	resChan := make(chan string)
 	errChan := make(chan error)
-	key := fmt.Sprintf("success-%s-%s", proj, branch)
+	key := successKey(proj, branch)
 	q.store.Find(key, func(res []byte, err error) {
 		if err != nil {
 			errChan <- err
@@ -96,7 +103,7 @@ func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 		}
 		if len(res) == 0 {
 			innerChan := make(chan []byte)
-			innerKey := fmt.Sprintf("success-%s", proj)
+			innerKey := successKey(proj, "")
 			q.store.Find(innerKey, func(innerRes []byte, innerErr error) {
 				if innerErr != nil {
 					errChan <- err
@@ -118,8 +125,8 @@ func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 
 func (q *Queue) SaveLastSuccess(proj, branch, last string) error {
 	errChan := make(chan error)
-	key1 := fmt.Sprintf("success-%s-%s", proj, branch)
-	key2 := fmt.Sprintf("success-%s", proj)
+	key1 := successKey(proj, branch)
+	key2 := successKey(proj, "")
 	lastSucc := lastSuccess{Commit: last}
 	q.store.Save(key1, lastSucc, func(err error) {
 		errChan <- err
@@ -140,7 +147,7 @@ func (q *Queue) SaveLastSuccess(proj, branch, last string) error {
 
 // Add adds a project to the queue
 func (q *Queue) Add(proj, branch, prevCommit, currCommit string) {
-	last, lastErr := q.getLastSuccess(proj, branch)
+	last, lastErr := q.GetLastSuccess(proj, branch)
 	if lastErr != nil || len(last) == 0 {
 		if lastErr != nil {
 			fmt.Println("WARNING:", lastErr.Error())
