@@ -1,6 +1,8 @@
 package lifecycle
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cpg1111/maestrod/datastore"
@@ -63,11 +65,11 @@ func (r *Running) Watch(manager *manager.Driver) {
 // Queue is the qaiting queue
 type Queue struct {
 	Queue []*QueueEntry
-	store *datastore.Datastore
+	store datastore.Datastore
 }
 
 // NewQueue returns a pointer to an instanc of a queue
-func NewQueue(store *datastore.Datastore) *Queue {
+func NewQueue(store datastore.Datastore) *Queue {
 	return &Queue{
 		Queue: []*QueueEntry{},
 		store: store,
@@ -78,12 +80,84 @@ func (q *Queue) set(queue []*QueueEntry) {
 	q.Queue = queue
 }
 
+type lastSuccess struct {
+	Commit string
+}
+
+func successKey(proj, branch string) string {
+	if len(branch) > 0 {
+		return fmt.Sprintf("/success/%s/%s", proj, branch)
+	}
+	return fmt.Sprintf("/success/%s", proj)
+}
+
+func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
+	resChan := make(chan string)
+	errChan := make(chan error)
+	key := successKey(proj, branch)
+	q.store.Find(key, func(res []byte, err error) {
+		if err != nil {
+			errChan <- err
+			close(resChan)
+			return
+		}
+		if len(res) == 0 {
+			innerChan := make(chan []byte)
+			innerKey := successKey(proj, "")
+			q.store.Find(innerKey, func(innerRes []byte, innerErr error) {
+				if innerErr != nil {
+					errChan <- err
+					close(innerChan)
+					return
+				}
+				innerChan <- innerRes
+			})
+			res = <-innerChan
+		}
+		decRes := &lastSuccess{}
+		errChan <- json.Unmarshal(res, decRes)
+		resChan <- decRes.Commit
+	})
+	commit := <-resChan
+	cErr := <-errChan
+	return commit, cErr
+}
+
+func (q *Queue) SaveLastSuccess(proj, branch, last string) error {
+	errChan := make(chan error)
+	key1 := successKey(proj, branch)
+	key2 := successKey(proj, "")
+	lastSucc := lastSuccess{Commit: last}
+	q.store.Save(key1, lastSucc, func(err error) {
+		errChan <- err
+	})
+	q.store.Save(key2, lastSucc, func(err error) {
+		errChan <- err
+	})
+	for errCount := 0; errCount < 2; {
+		err := <-errChan
+		if err != nil {
+			return err
+		}
+		errCount++
+	}
+	close(errChan)
+	return nil
+}
+
 // Add adds a project to the queue
 func (q *Queue) Add(proj, branch, prevCommit, currCommit string) {
+	last, lastErr := q.GetLastSuccess(proj, branch)
+	if lastErr != nil || len(last) == 0 {
+		if lastErr != nil {
+			fmt.Println("WARNING:", lastErr.Error())
+		}
+		last = prevCommit
+	}
 	newEntry := &QueueEntry{
 		Project:    proj,
 		Branch:     branch,
-		PrevCommit: prevCommit,
+		PrevCommit: last,
 		CurrCommit: currCommit,
 		CreatedAt:  time.Now(),
 		Status:     "queued",
@@ -121,8 +195,7 @@ func (q *Queue) Pop(r *Running, maxBuilds int) *QueueEntry {
 // SnapShot saves the queue's current state
 func (q *Queue) SnapShot() error {
 	errChan := make(chan error)
-	store := *q.store
-	store.Save("queue", q.Queue, func(err error) {
+	q.store.Save("queue", q.Queue, func(err error) {
 		errChan <- err
 	})
 	saveErr := <-errChan

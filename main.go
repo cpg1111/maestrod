@@ -112,7 +112,7 @@ func main() {
 	conf := getConf()
 	store := getDataStore(conf)
 	managerDriver := getManager(conf)
-	queue := lifecycle.NewQueue(store)
+	queue := lifecycle.NewQueue(*store)
 	running := &lifecycle.Running{}
 	gitactivity.Run(&conf.Server, store, queue)
 	statecom.Run(
@@ -122,6 +122,7 @@ func main() {
 		(int)(conf.Server.StateComPort),
 		store,
 		running,
+		queue,
 	)
 	var err error
 	for err == nil {
