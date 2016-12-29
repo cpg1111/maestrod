@@ -84,7 +84,7 @@ type lastSuccess struct {
 	Commit string
 }
 
-func (q *Queue) getLastSuccess(proj, branch string) (string, error) {
+func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 	resChan := make(chan string)
 	errChan := make(chan error)
 	key := fmt.Sprintf("success-%s-%s", proj, branch)
@@ -116,7 +116,7 @@ func (q *Queue) getLastSuccess(proj, branch string) (string, error) {
 	return commit, cErr
 }
 
-func (q *Queue) saveLastSuccess(proj, branch, last string) error {
+func (q *Queue) SaveLastSuccess(proj, branch, last string) error {
 	errChan := make(chan error)
 	key1 := fmt.Sprintf("success-%s-%s", proj, branch)
 	key2 := fmt.Sprintf("success-%s", proj)
