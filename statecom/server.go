@@ -11,11 +11,13 @@ import (
 )
 
 // Run runs the statecom server
-func Run(host, certPath, keyPath string, port int, store *datastore.Datastore, running *lifecycle.Running) {
+func Run(host, certPath, keyPath string, port int, store *datastore.Datastore, running *lifecycle.Running, queue *lifecycle.Queue) {
 	go func() {
 		handler := NewHandler(store, running)
+		successHandler := NewSuccessHandler(store, running, queue)
 		mux := http.NewServeMux()
 		mux.Handle("/state", handler)
+		mux.Handle("/success", successHandler)
 		server := &http.Server{
 			Addr:    fmt.Sprintf("%s:%d", host, port),
 			Handler: mux,

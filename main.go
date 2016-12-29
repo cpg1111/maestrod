@@ -122,6 +122,7 @@ func main() {
 		(int)(conf.Server.StateComPort),
 		store,
 		running,
+		queue,
 	)
 	var err error
 	for err == nil {
