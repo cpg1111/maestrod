@@ -42,55 +42,67 @@ func NewV2(host, port string) (*Etcd2, error) {
 
 // Save saves data in etcd
 func (e Etcd2) Save(key string, data interface{}, callback datastore.NoResultCallback) {
-	go func() {
-		value, marshErr := json.Marshal(data)
+	go func(e Etcd2, k string, d interface{}, c datastore.NoResultCallback) {
+		value, marshErr := json.Marshal(d)
 		if marshErr != nil {
-			callback(marshErr)
+			c(marshErr)
 			return
 		}
-		_, setErr := e.Key.Set(context.Background(), key, (string)(value), nil)
-		callback(setErr)
-	}()
+		_, setErr := e.Key.Set(context.Background(), k, (string)(value), nil)
+		c(setErr)
+	}(e, key, data, callback)
 }
 
 // Find finds data in etcd
 func (e Etcd2) Find(queryStr string, callback datastore.ResultCallback) {
-	go func() {
-		resp, getErr := e.Key.Get(context.Background(), queryStr, nil)
-		callback(([]byte)(resp.Node.Value), getErr)
-	}()
+	go func(e Etcd2, q string, c datastore.ResultCallback) {
+		var res []byte
+		resp, getErr := e.Key.Get(context.Background(), q, nil)
+		if getErr != nil {
+			c(res, getErr)
+			return
+		}
+		if resp.Node != nil {
+			res = ([]byte)(resp.Node.Value)
+		}
+		c(res, getErr)
+	}(e, queryStr, callback)
 }
 
 // Remove removes data in etcd
 func (e Etcd2) Remove(queryStr string, callback datastore.NoResultCallback) {
-	go func() {
-		_, delErr := e.Key.Delete(context.Background(), queryStr, nil)
-		callback(delErr)
-	}()
+	go func(e Etcd2, q string, c datastore.NoResultCallback) {
+		_, delErr := e.Key.Delete(context.Background(), q, nil)
+		c(delErr)
+	}(e, queryStr, callback)
 }
 
 // Update updates data in etcd
 func (e Etcd2) Update(queryStr string, update interface{}, callback datastore.NoResultCallback) {
-	go func() {
-		value, marshErr := json.Marshal(update)
+	go func(e Etcd2, q string, u interface{}, c datastore.NoResultCallback) {
+		value, marshErr := json.Marshal(u)
 		if marshErr != nil {
-			callback(marshErr)
+			c(marshErr)
 			return
 		}
-		_, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
-		callback(updateErr)
-	}()
+		_, updateErr := e.Key.Update(context.Background(), q, (string)(value))
+		c(updateErr)
+	}(e, queryStr, update, callback)
 }
 
 // FindAndUpdate updates data, then returns it
 func (e Etcd2) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
-	go func() {
-		value, marshErr := json.Marshal(update)
+	go func(e Etcd2, q string, u interface{}, c datastore.ResultCallback) {
+		var res []byte
+		value, marshErr := json.Marshal(u)
 		if marshErr != nil {
-			callback(nil, marshErr)
+			c(res, marshErr)
 			return
 		}
-		resp, updateErr := e.Key.Update(context.Background(), queryStr, (string)(value))
-		callback(([]byte)(resp.Node.Value), updateErr)
-	}()
+		resp, updateErr := e.Key.Update(context.Background(), q, (string)(value))
+		if resp.Node != nil {
+			res = ([]byte)(resp.Node.Value)
+		}
+		c(res, updateErr)
+	}(e, queryStr, update, callback)
 }

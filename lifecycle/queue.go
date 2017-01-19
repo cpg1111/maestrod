@@ -91,14 +91,15 @@ func successKey(proj, branch string) string {
 	return fmt.Sprintf("/success/%s", proj)
 }
 
+// GetLastSuccess fetches the commit hash of the last successful build
 func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 	resChan := make(chan string)
 	errChan := make(chan error)
 	key := successKey(proj, branch)
 	q.store.Find(key, func(res []byte, err error) {
 		if err != nil {
+			resChan <- ""
 			errChan <- err
-			close(resChan)
 			return
 		}
 		if len(res) == 0 {
@@ -106,11 +107,12 @@ func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 			innerKey := successKey(proj, "")
 			q.store.Find(innerKey, func(innerRes []byte, innerErr error) {
 				if innerErr != nil {
+					innerChan <- innerRes
 					errChan <- err
-					close(innerChan)
 					return
 				}
 				innerChan <- innerRes
+
 			})
 			res = <-innerChan
 		}
@@ -123,6 +125,7 @@ func (q *Queue) GetLastSuccess(proj, branch string) (string, error) {
 	return commit, cErr
 }
 
+// SaveLastSuccess saves the commits of the last successful build on a branch of a project
 func (q *Queue) SaveLastSuccess(proj, branch, last string) error {
 	errChan := make(chan error)
 	key1 := successKey(proj, branch)
