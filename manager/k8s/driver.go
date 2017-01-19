@@ -172,7 +172,7 @@ func (d *Driver) createVolumes(confName, hostVol string) ([]Volume, error) {
 }
 
 func fmtName(name string) string {
-	name = strings.Replace(strings.Replace(name, "/", "-", -1), "_", "-", -1)
+	name = strings.ToLower(strings.Replace(strings.Replace(name, "/", "-", -1), "_", "-", -1))
 	if len(name) > 58 {
 		return name[0:58]
 	}
