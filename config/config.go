@@ -132,9 +132,12 @@ func loadS3(path string) (*Config, error) {
 
 func loadGStorage(path string) (*Config, error) {
 	remote := parseRemote(path)
-	opts := options.WithServiceAccountFile(os.Getenv("GCLOUD_SVC_ACCNT_FILE"))
+	opts := option.WithServiceAccountFile(os.Getenv("GCLOUD_SVC_ACCNT_FILE"))
 	ctx := context.Background()
-	gsClient := gs.NewClient(ctx, opts)
+	gsClient, err := gs.NewClient(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
 	bucket := gsClient.Bucket(remote.Bucket)
 	obj := bucket.Object(remote.Object)
 	rdr, err := obj.NewReader(ctx)
