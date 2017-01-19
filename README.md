@@ -43,7 +43,7 @@ MaxBuilds=<the number of max active builds you want> # REQUIRED
 DataStoreType=<the datastore to be used> # Currently can be: etcd2, etcd3, mongodb, or redis REQUIRED
 DataStoreUser=<any user to auth with datastore>
 DataStorePWD=<any password to auth with datastore> # plain text for now, but it will take a hash in the future
-DataStoreEnvIP=<env var name for the datastore IP addr> 
+DataStoreEnvIP=<env var name for the datastore IP addr>
 DataStoreStaticIP=<hardcoded IP addr of the datastore>
 DataStoreEnvPort=<env var name for the datastore port number>
 DataStoreStaticPort=<hardcoded port number of the datastore>
@@ -87,7 +87,30 @@ maestrod \
 --datastore-type=<datastore config override>
 ```
 
-Then add `http(s)://<public maestro ip>:<maestro port>/push` as a webhook for repo pushes and 
+Then add `http(s)://<public maestro ip>:<maestro port>/push` as a webhook for repo pushes and
 
 `http(s)://<public maestro ip>:<maestro port>/pullrequest` for pull request hooks.
 
+## Using a remotely hosted Config
+
+If you supply a path such as `s3://aBucket/maestrod/conf.toml` or `gs://aBucket/maestrod/conf.toml`, Maestrod will fetch the config from either S3 or Google Cloud Storage as oppose to local disk.
+
+### To Authenticate with the Object Store
+
+#### S3
+
+Supply the environment variables:
+
+    ```
+        AWS_ACCESS_KEY_ID=<your access key ID>
+        AWS_SECRET_ACCESS_KEY=<your secret key>
+        AWS_S3_REGION=<the s3 region to use>
+    ```
+
+#### Google Cloud Storage
+
+Supply the environment variable:
+
+    ```
+        GCLOUD_SVC_ACCNT_FILE=<path to a service account file>
+    ```
