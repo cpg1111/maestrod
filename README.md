@@ -101,16 +101,16 @@ If you supply a path such as `s3://aBucket/maestrod/conf.toml` or `gs://aBucket/
 
 Supply the environment variables:
 
-    ```
+    
         AWS_ACCESS_KEY_ID=<your access key ID>
         AWS_SECRET_ACCESS_KEY=<your secret key>
         AWS_S3_REGION=<the s3 region to use>
-    ```
+    
 
 #### Google Cloud Storage
 
 Supply the environment variable:
 
-    ```
+    
         GCLOUD_SVC_ACCNT_FILE=<path to a service account file>
-    ```
+    
