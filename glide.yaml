@@ -42,9 +42,33 @@ import:
   - libcontainer
   - libcontainer/user
 - package: github.com/ugorji/go
-  subpackage:
-  - codec
 - package: google.golang.org/grpc
 - package: gopkg.in/bsm/ratelimit.v1
+- package: github.com/aws/aws-sdk-go
+  version: ^1.6.13
+  subpackages:
+  - aws
+- package: cloud.google.com/go
+  version: ^0.6.0
+  subpackages:
+  - storage
+  - compute/metadata
+- package: google.golang.org/api
+  version: b9d03e6e091e36f9a089515bc84cf14c2d199c4c
+  subpackages:
+  - option
+  - iterator
+  - transport
+- package: golang.org/x/oauth2
+  version: 314dd2c0bf3ebd592ec0d20847d27e79d0dbe8dd
+- package: github.com/googleapis/gax-go
+- package: github.com/docker/distribution
+  version: ^2.6.0
+  subpackages:
+  - reference
+- package: google.golang.org/cloud
+  version: ^0.6.0
+  subpackages:
+  - compute/metadata
 testImport:
 - package: github.com/fatih/structs
