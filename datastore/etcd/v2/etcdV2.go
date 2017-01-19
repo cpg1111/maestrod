@@ -56,8 +56,16 @@ func (e Etcd2) Save(key string, data interface{}, callback datastore.NoResultCal
 // Find finds data in etcd
 func (e Etcd2) Find(queryStr string, callback datastore.ResultCallback) {
 	go func(e Etcd2, q string, c datastore.ResultCallback) {
+		var res []byte
 		resp, getErr := e.Key.Get(context.Background(), q, nil)
-		c(([]byte)(resp.Node.Value), getErr)
+		if getErr != nil {
+			c(res, getErr)
+			return
+		}
+		if resp.Node != nil {
+			res = ([]byte)(resp.Node.Value)
+		}
+		c(res, getErr)
 	}(e, queryStr, callback)
 }
 
@@ -74,7 +82,7 @@ func (e Etcd2) Update(queryStr string, update interface{}, callback datastore.No
 	go func(e Etcd2, q string, u interface{}, c datastore.NoResultCallback) {
 		value, marshErr := json.Marshal(u)
 		if marshErr != nil {
-			callback(marshErr)
+			c(marshErr)
 			return
 		}
 		_, updateErr := e.Key.Update(context.Background(), q, (string)(value))
@@ -85,12 +93,16 @@ func (e Etcd2) Update(queryStr string, update interface{}, callback datastore.No
 // FindAndUpdate updates data, then returns it
 func (e Etcd2) FindAndUpdate(queryStr string, update interface{}, callback datastore.ResultCallback) {
 	go func(e Etcd2, q string, u interface{}, c datastore.ResultCallback) {
+		var res []byte
 		value, marshErr := json.Marshal(u)
 		if marshErr != nil {
-			c(nil, marshErr)
+			c(res, marshErr)
 			return
 		}
 		resp, updateErr := e.Key.Update(context.Background(), q, (string)(value))
-		c(([]byte)(resp.Node.Value), updateErr)
+		if resp.Node != nil {
+			res = ([]byte)(resp.Node.Value)
+		}
+		c(res, updateErr)
 	}(e, queryStr, update, callback)
 }
