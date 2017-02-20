@@ -16,8 +16,6 @@ import (
 	"github.com/cpg1111/maestrod/gitactivity"
 	"github.com/cpg1111/maestrod/lifecycle"
 	"github.com/cpg1111/maestrod/manager"
-	"github.com/cpg1111/maestrod/manager/docker"
-	"github.com/cpg1111/maestrod/manager/k8s"
 	"github.com/cpg1111/maestrod/statecom"
 )
 
@@ -92,14 +90,17 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 }
 
 func getManager(conf *config.Config) *manager.Driver {
-	runtime := plugin.Open(conf.Server.RuntimePluginPath)
-	newDriverPtr, dErr := runtime.LookUp("PluginDriver")
-	if dErr != nil {
-		panic(dErr)
+	runtime, err := plugin.Open(conf.Server.RuntimePluginPath)
+	if err != nil {
+		panic(err)
+	}
+	newDriverPtr, err := runtime.Lookup("PluginDriver")
+	if err != nil {
+		panic(err)
 	}
 	newDriver := newDriverPtr.(*manager.PluginDriver)
 	newDriverFn := *newDriver
-	return newDriverFn(conf.Server.MaestroVersion, &conf.Server)
+	return newDriverFn(conf.Server.MaestroVersion, conf)
 }
 
 func main() {
@@ -120,7 +121,7 @@ func main() {
 	)
 	var err error
 	for err == nil {
-		err = lifecycle.Check(conf, queue, running, managerDriver)
+		err = lifecycle.Check(conf, queue, running, *managerDriver)
 		time.Sleep(3 * time.Second)
 	}
 	log.Fatal(err)

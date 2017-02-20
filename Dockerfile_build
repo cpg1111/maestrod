@@ -1,4 +1,4 @@
-FROM golang:1.7
+FROM golang:1.8
 MAINTAINER Christian Grabowski
 ADD . /go/src/github.com/cpg1111/maestrod/
 RUN apt-get update --fix-missing && apt-get install -y build-essential curl && \

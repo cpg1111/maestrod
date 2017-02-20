@@ -1,11 +1,11 @@
 package k8s
 
 import (
-	"plugin"
-
 	"github.com/cpg1111/maestrod/config"
+	"github.com/cpg1111/maestrod/manager"
+	d "github.com/cpg1111/maestrod/manager/k8s/driver"
 )
 
-func PluginDriver(maestroVersion string, conf *config.Server) *Driver {
-	return New(maestroVersion, conf)
+func PluginDriver(maestroVersion string, conf *config.Config) manager.Driver {
+	return d.New(maestroVersion, conf)
 }

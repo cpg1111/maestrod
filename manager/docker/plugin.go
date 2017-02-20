@@ -1,14 +1,15 @@
 package docker
 
 import (
-	"plugin"
-
 	"github.com/cpg1111/maestrod/config"
+	"github.com/cpg1111/maestrod/manager"
+	d "github.com/cpg1111/maestrod/manager/docker/driver"
 )
 
-func PluginDriver(maestroVersion string, conf *config.Server) *Driver {
-	driver, dErr := New("v1.23", maestroVersion)
+func PluginDriver(maestroVersion string, conf *config.Config) manager.Driver {
+	driver, dErr := d.New("v1.23", maestroVersion)
 	if dErr != nil {
 		panic(dErr)
 	}
+	return driver
 }
