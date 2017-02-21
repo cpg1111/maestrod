@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"plugin"
 	"time"
 
 	"github.com/cpg1111/maestrod/config"
@@ -15,8 +16,6 @@ import (
 	"github.com/cpg1111/maestrod/gitactivity"
 	"github.com/cpg1111/maestrod/lifecycle"
 	"github.com/cpg1111/maestrod/manager"
-	"github.com/cpg1111/maestrod/manager/docker"
-	"github.com/cpg1111/maestrod/manager/k8s"
 	"github.com/cpg1111/maestrod/statecom"
 )
 
@@ -91,21 +90,16 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 }
 
 func getManager(conf *config.Config) manager.Driver {
-	switch conf.Server.Runtime {
-	case "docker":
-		driver, dErr := docker.New("v1.23", conf.Server.MaestroVersion)
-		if dErr != nil {
-			log.Fatal(dErr)
-		}
-		return *driver
-	case "kubernetes":
-	case "k8s":
-		driver := k8s.New(conf.Server.MaestroVersion, conf)
-		return *driver
-	default:
-		log.Fatal("specifcied runtime is not supported yet, please create an issue @ https://github.com/cpg1111/maestrod")
+	runtime, err := plugin.Open(conf.Server.RuntimePluginPath)
+	if err != nil {
+		panic(err)
 	}
-	return nil
+	newDriverPtr, err := runtime.Lookup("PluginDriver")
+	if err != nil {
+		panic(err)
+	}
+	newDriver := newDriverPtr.(func(string, *config.Config) manager.Driver)
+	return newDriver(conf.Server.MaestroVersion, conf)
 }
 
 func main() {

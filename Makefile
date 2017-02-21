@@ -1,9 +1,14 @@
 all: build
 get-deps:
-	echo;
+	if [ -z `which glide` ]; then \
+		curl https://glide.sh/get | sh; \
+	fi
 build:
 	glide install
+	mkdir -p ./plugin.d/
 	go build -o maestrod main.go
+	go build -buildmode=plugin -o ./plugin.d/docker.so manager/docker/plugin.go
+	go build -buildmode=plugin -o ./plugin.d/kube.so manager/k8s/plugin.go
 test:
 	ETCD2_SERVICE_HOST=127.0.0.1 ETCD2_SERVICE_PORT=22379 go test ./datastore/etcd/v2/...
 	ETCD3_SERVICE_HOST=127.0.0.1 ETCD3_SERVICE_PORT=32379 go test ./datastore/etcd/v3/...
@@ -27,6 +32,9 @@ install:
 	mkdir -p /etc/maestrod/
 	cp maestrod /opt/bin/maestrod/maestrod
 	cp example.conf.toml /etc/maestrod/conf.toml
+	mkdir -p /etc/maestrod/conf.d/ /opt/bin/maestrod/plugin.d/
+	cp ./plugin.d/docker.so /opt/bin/maestrod/plugin.d/
+	cp ./plugin.d/kube.so /opt/bin/maestrod/plugin.d/
 docker:
 	docker build -t maestrod-build -f Dockerfile_build .
 	docker run -v `pwd`/dist/:/opt/bin/maestrod/ maestrod-build
