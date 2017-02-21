@@ -1,6 +1,8 @@
 all: build
 get-deps:
-	echo;
+	if [ -z `which glide` ]; then \
+		curl https://glide.sh/get | sh; \
+	fi
 build:
 	glide install
 	mkdir -p ./plugin.d/
@@ -30,9 +32,9 @@ install:
 	mkdir -p /etc/maestrod/
 	cp maestrod /opt/bin/maestrod/maestrod
 	cp example.conf.toml /etc/maestrod/conf.toml
-	mkdir -p /etc/maestrod/conf.d/ /etc/maestrod/plugin.d/
-	cp docker.so /etc/maestrod/plugin.d/
-	cp kube.so /etc/maestrod/plugin.d/
+	mkdir -p /etc/maestrod/conf.d/ /opt/bin/maestrod/plugin.d/
+	cp ./plugin.d/docker.so /opt/bin/maestrod/plugin.d/
+	cp ./plugin.d/kube.so /opt/bin/maestrod/plugin.d/
 docker:
 	docker build -t maestrod-build -f Dockerfile_build .
 	docker run -v `pwd`/dist/:/opt/bin/maestrod/ maestrod-build

@@ -1,4 +1,4 @@
-package k8s
+package main
 
 import (
 	"github.com/cpg1111/maestrod/config"

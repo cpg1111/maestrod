@@ -1,4 +1,4 @@
-package docker
+package main
 
 import (
 	"github.com/cpg1111/maestrod/config"

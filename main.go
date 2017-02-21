@@ -89,7 +89,7 @@ func getDataStore(conf *config.Config) *datastore.Datastore {
 	return &store
 }
 
-func getManager(conf *config.Config) *manager.Driver {
+func getManager(conf *config.Config) manager.Driver {
 	runtime, err := plugin.Open(conf.Server.RuntimePluginPath)
 	if err != nil {
 		panic(err)
@@ -98,9 +98,8 @@ func getManager(conf *config.Config) *manager.Driver {
 	if err != nil {
 		panic(err)
 	}
-	newDriver := newDriverPtr.(*manager.PluginDriver)
-	newDriverFn := *newDriver
-	return newDriverFn(conf.Server.MaestroVersion, conf)
+	newDriver := newDriverPtr.(func(string, *config.Config) manager.Driver)
+	return newDriver(conf.Server.MaestroVersion, conf)
 }
 
 func main() {
@@ -121,7 +120,7 @@ func main() {
 	)
 	var err error
 	for err == nil {
-		err = lifecycle.Check(conf, queue, running, *managerDriver)
+		err = lifecycle.Check(conf, queue, running, managerDriver)
 		time.Sleep(3 * time.Second)
 	}
 	log.Fatal(err)

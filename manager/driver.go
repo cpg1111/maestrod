@@ -22,4 +22,4 @@ type Driver interface {
 }
 
 // PluginDriver is a function type that returns a driver
-type PluginDriver func(maestroVersion string, conf *config.Config) *Driver
+type PluginDriver func(string, *config.Config) Driver
